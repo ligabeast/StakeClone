@@ -2,24 +2,24 @@
   <p>Home</p>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useMyFetch } from "~/composable/useMyFetch";
 
 definePageMeta({
   layout: "main",
 });
 
-//on mount
+const query = gql`
+  query GetGame($id: ID!) {
+    game(id: $id) {
+      id
+      name
+    }
+  }
+`;
+const variables = { id: 5 };
 onMounted(async () => {
-  console.log("Home page mounted");
-  useMyFetch("/index", {
-    method: "GET",
-  })
-    .then((res) => {
-      console.log(res);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  const { data } = await useAsyncQuery(query, variables);
+  console.log(data.value);
 });
 </script>

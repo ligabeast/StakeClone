@@ -3,7 +3,7 @@ const { DataTypes: Sequelize } = require("sequelize");
 const resolvers = {
   Query: {
     game: (parent, args, context) => {
-      const Game = context.db.define("game", {
+      const Game = context.db.define("Game", {
         id: {
           allowNull: false,
           autoIncrement: true,

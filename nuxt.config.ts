@@ -16,5 +16,19 @@ export default defineNuxtConfig({
       Montserrat: [400],
     },
   },
-  modules: ["@nuxtjs/google-fonts"],
+  modules: ["@nuxtjs/google-fonts", "@nuxtjs/apollo"],
+  apollo: {
+    autoImports: true,
+    // authType: "Bearer",
+    // authHeader: "Authorization",
+    tokenStorage: "cookie",
+    proxyCookies: true,
+    clients: {
+      default: { httpEndpoint: process.env.BASE_URL + "/graphql" },
+      tokenName: "apollo:<client-name>.token",
+      tokenStorage: "cookie",
+      // authType: "Bearer",
+      // authHeader: "Authorization",
+    },
+  },
 });
