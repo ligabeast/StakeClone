@@ -51,7 +51,15 @@ const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
   host: DB_HOST,
   dialect: DB_DIALECT,
   port: DB_PORT,
-  connectTimeout: 5000,
+  dialectOptions: {
+    connectTimeout: 3000,
+  },
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000, // Zeit in Millisekunden, um eine Verbindung zu erwerben
+    idle: 10000, // Zeit in Millisekunden, nach der eine Verbindung in den Leerlauf geht
+  },
 });
 
 const typeDefs = loadSchemaSync("./schema.graphql", {
