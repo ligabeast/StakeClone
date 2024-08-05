@@ -1,0 +1,9 @@
+{
+  "development": {
+    "host": "database-1.clyocw2cuyqc.us-east-2.rds.amazonaws.com",
+    "username": "admin",
+    "password": "TCoiU1D7u49bFynjJ3dU",
+    "database": "Stake",
+    "dialect": "mariadb"
+  }
+}

@@ -1,0 +1,9 @@
+type Game {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  game(id: ID!): Game
+  games: [Game!]!
+}
