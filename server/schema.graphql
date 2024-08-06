@@ -3,6 +3,18 @@ type Game {
   name: String!
 }
 
+type Bet {
+  id: ID!
+  userid: ID!
+  gameid: ID!
+  amount: Float!
+  payout: Float
+  transaction_id: ID!
+  currency: String!
+  bet_status: String!
+  odds: Float
+}
+
 type Query {
   game(id: ID!): Game
   games: [Game!]!
