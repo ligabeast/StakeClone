@@ -14,6 +14,32 @@ import resolvers from "./resolvers";
 import { TIMEOUT } from "dns";
 
 const { Sequelize } = require("sequelize");
+const jwt = require("jsonwebtoken");
+const bodyParser = require("body-parser");
+
+import Express from "express";
+import { Query, Send } from "express-serve-static-core";
+interface TypedRequestQuery<T extends Query> extends Express.Request {
+  query: T;
+}
+interface TypedRequestBody<T> extends Express.Request {
+  body: T;
+}
+export interface TypedResponse<ResBody> extends Express.Response {
+  json: Send<ResBody, this>;
+}
+
+app.use(bodyParser.json());
+
+const generateToken = (payload): string => {
+  const secretKey = process.env.JWT_SECRET_KEY;
+  const options = {
+    expiresIn: "1h",
+  };
+
+  const token = jwt.sign(payload, secretKey, options);
+  return token;
+};
 
 // Load environment variables from the .env file in the root directory
 dotenv.config({ path: "../.env" });
@@ -22,10 +48,8 @@ const port = process.env.EXPRESS_PORT;
 const corsOptions: CorsOptions = {
   origin: process.env.CORS_ORIGIN,
   optionsSuccessStatus: 200,
-  preflightContinue: true,
   methods: "GET, POST, OPTIONS, PUT, DELETE",
   allowedHeaders: "Content-Type, Authorization",
-  credentials: true,
   maxAge: 86400,
 };
 
@@ -77,6 +101,47 @@ app.use(
       db: sequelize,
     },
   })
+);
+
+app.post(
+  "/login",
+  (
+    req: TypedRequestBody<{ username: string; password: string }>,
+    res: TypedResponse<{
+      success: boolean;
+      message: string;
+      token?: string;
+      deposit?: number;
+      username?: string;
+    }>
+  ) => {
+    const { username, password } = req.body;
+
+    // Check if username and password match
+    if (true) {
+      // Generate JWT token
+      const token = generateToken({ username, password });
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 3600000, // 1 hour
+      });
+
+      res.json({
+        success: true,
+        message: "Login successfully",
+        token: token,
+        username: "test",
+        deposit: 50.0,
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "Invalid username or password",
+      });
+    }
+  }
 );
 
 app.listen(port, async () => {

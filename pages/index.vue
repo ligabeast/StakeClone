@@ -4,10 +4,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: "main",
-});
-
 const queryGetAllGames = gql`
   query {
     games {
