@@ -20,6 +20,12 @@ export const useAuthStore = defineStore("auth", () => {
     deposit.value = newDeposit;
   }
 
+  function reset() {
+    token.value = "";
+    username.value = "";
+    deposit.value = 0;
+  }
+
   // Define getters
   const isAuthenticated = computed(() => {
     return token.value !== "";
@@ -30,6 +36,7 @@ export const useAuthStore = defineStore("auth", () => {
     token,
     username,
     deposit,
+    reset,
     // Expose actions
     setToken,
     setUsername,
