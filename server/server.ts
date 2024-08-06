@@ -118,7 +118,13 @@ app.post(
     const { username, password } = req.body;
 
     // Check if username and password match
-    if (true) {
+    const isValid = sequelize.query(
+      "SELECT * FROM users u where u.username = :username and u.password = :password",
+      {
+        replacements: { username, password },
+      }
+    );
+    if (isValid) {
       // Generate JWT token
       const token = generateToken({ username, password });
 

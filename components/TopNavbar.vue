@@ -1,6 +1,6 @@
 <template>
   <div class="w-full h-full flex px-16" id="box">
-    <div class="flex justify-between px-2">
+    <div class="flex w-full justify-between pl-2 pr-24">
       <NuxtLink to="/">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -24,13 +24,52 @@
           </g>
         </svg>
       </NuxtLink>
-      <div></div>
-      <div></div>
+      <div class="flex items-center">
+        <button
+          class="rounded-sm font-semibold whitespace-nowrap ring-offset-background transition disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] bg-transparent text-white hover:bg-transparent hover:text-white focus-visible:outline-none text-sm leading-none py-[0.9375rem] px-[1.25rem]"
+          @click="handleLoginRequest"
+        >
+          Sign in
+        </button>
+        <button
+          class="rounded-sm font-semibold whitespace-nowrap ring-offset-background transition disabled:pointer-events-none disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] bg-blue-500 text-white hover:bg-blue-600 hover: focus-visible:outline-white text-sm leading-none shadow-md py-[0.9375rem] px-[1.25rem]"
+        >
+          Register
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useMyFetch } from "~/composable/useMyFetch";
+import { useAuthStore } from "~/stores/auth";
+
+const authStore = useAuthStore();
+
+function handleLoginRequest() {
+  useMyFetch("/login", {
+    method: "POST",
+    body: JSON.stringify({
+      username: "test@g.de",
+      password: "123",
+    }),
+  })
+    .then((data) => {
+      authStore.setDeposit(data.deposit);
+      authStore.setUsername(data.username);
+      authStore.setToken(data.token);
+
+      const token = useCookie("token");
+      token.value = data.token;
+
+      console.log("auth middleware, fetched token");
+    })
+    .catch((error) => {
+      console.log("auth middlewate, error: ", error);
+    });
+}
+</script>
 <style>
 #box {
   box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 6px -1px,

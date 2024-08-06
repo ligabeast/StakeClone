@@ -14,6 +14,8 @@ module.exports = {
      */
     const users = Array.from({ length: 1000 }, () => ({
       name: "John Doe",
+      email: "test@test.de",
+      password: "password",
     }));
     const transactions = Array.from({ length: 1000 }, () => ({
       message: "Test",
