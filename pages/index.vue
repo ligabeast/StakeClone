@@ -1,10 +1,8 @@
 <template>
-  <p>Home</p>
+  <p>Home {{ game }}</p>
 </template>
 
 <script setup lang="ts">
-import { useMyFetch } from "~/composable/useMyFetch";
-
 definePageMeta({
   layout: "main",
 });
@@ -18,8 +16,5 @@ const query = gql`
   }
 `;
 const variables = { id: 5 };
-onMounted(async () => {
-  const { data } = await useAsyncQuery(query, variables);
-  console.log(data.value);
-});
+const { data: game } = await useAsyncQuery(query, variables);
 </script>

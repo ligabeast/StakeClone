@@ -1,28 +1,11 @@
 const { DataTypes: Sequelize } = require("sequelize");
+import { resolvers as gameResolver } from "./schemas/game.js";
 
 const resolvers = {
   Query: {
     game: (parent, args, context) => {
-      const Game = context.db.define("Game", {
-        id: {
-          allowNull: false,
-          autoIncrement: true,
-          primaryKey: true,
-          type: Sequelize.INTEGER,
-        },
-        name: {
-          type: Sequelize.STRING,
-          allowNull: false,
-        },
-        createdAt: {
-          allowNull: false,
-          type: Sequelize.DATE,
-        },
-        updatedAt: {
-          allowNull: true,
-          type: Sequelize.DATE,
-        },
-      });
+      console.log("resolvers", gameResolver);
+      const Game = context.db.define("Game", gameResolver);
       return Game.findByPk(args.id);
     },
     games: () => {

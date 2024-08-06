@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  ssr: true,
   css: ["~/assets/css/main.css"],
   runtimeConfig: { public: { baseUrl: process.env.BASE_URL } },
   postcss: {
