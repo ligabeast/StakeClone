@@ -19,6 +19,9 @@ const bodyParser = require("body-parser");
 
 import Express from "express";
 import { Query, Send } from "express-serve-static-core";
+
+import bcrypt from "bcrypt";
+
 interface TypedRequestQuery<T extends Query> extends Express.Request {
   query: T;
 }
@@ -45,8 +48,19 @@ const generateToken = (payload): string => {
 dotenv.config({ path: "../.env" });
 
 const port = process.env.EXPRESS_PORT;
+const allowedOrigins = process.env.CORS_ORIGIN.split(",");
 const corsOptions: CorsOptions = {
-  origin: process.env.CORS_ORIGIN,
+  origin: function (origin, callback) {
+    // allow requests with no origin, like mobile apps or curl requests
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg =
+        "The CORS policy for this site does not " +
+        "allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   optionsSuccessStatus: 200,
   methods: "GET, POST, OPTIONS, PUT, DELETE",
   allowedHeaders: "Content-Type, Authorization",
@@ -91,6 +105,8 @@ const typeDefs = loadSchemaSync("./schema.graphql", {
 });
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
+const saltRounds = 10;
+
 app.use(
   "/graphql",
   graphqlHTTP({
@@ -102,10 +118,9 @@ app.use(
     },
   })
 );
-
 app.post(
   "/login",
-  (
+  async (
     req: TypedRequestBody<{ username: string; password: string }>,
     res: TypedResponse<{
       success: boolean;
@@ -117,34 +132,109 @@ app.post(
   ) => {
     const { username, password } = req.body;
 
-    // Check if username and password match
-    const isValid = sequelize.query(
-      "SELECT * FROM users u where u.username = :username and u.password = :password",
+    try {
+      // Query to get the hashed password from the database
+      const [results] = await sequelize.query(
+        "SELECT u.password FROM Users u WHERE u.username = :username",
+        {
+          replacements: { username },
+          type: Sequelize.QueryTypes.SELECT, // Specify the query type for better result form
+        }
+      );
+      if (results.password) {
+        const storedHashedPassword = results.password;
+        // Compare the provided password with the stored hashed password
+        const isPasswordMatch = await bcrypt.compare(
+          password,
+          storedHashedPassword
+        );
+
+        if (!isPasswordMatch) {
+          return res.status(401).json({
+            success: false,
+            message: "Invalid username or password",
+          });
+        }
+
+        // Generate JWT token
+        const token = generateToken({
+          username,
+          password: storedHashedPassword,
+        });
+
+        // Set the token in a cookie
+        res.cookie("token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 3600000, // 1 hour
+        });
+
+        return res.json({
+          success: true,
+          message: "Login successfully",
+          token: token,
+          username: "test",
+          deposit: 50.0,
+        });
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid username or password",
+        });
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while logging in.",
+      });
+    }
+  }
+);
+
+app.post(
+  "/register",
+  async (
+    req: TypedRequestBody<{ username: string; password: string }>,
+    res: TypedResponse<{
+      success: boolean;
+      message: string;
+      token?: string;
+      deposit?: number;
+      username?: string;
+    }>
+  ) => {
+    const { username, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const token = generateToken({
+      username,
+      password: hashedPassword,
+    });
+
+    const user = await sequelize.query(
+      "INSERT INTO Users (username, password) VALUES (:username, :password)",
       {
-        replacements: { username, password },
+        replacements: {
+          username,
+          password: hashedPassword,
+        },
+        type: Sequelize.QueryTypes.SELECT, // Specify the query type for better result form
       }
     );
-    if (isValid) {
-      // Generate JWT token
-      const token = generateToken({ username, password });
 
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 3600000, // 1 hour
-      });
-
+    if (user) {
       res.json({
         success: true,
-        message: "Login successfully",
+        message: "User registered successfully",
         token: token,
         username: "test",
         deposit: 50.0,
       });
     } else {
-      res.status(401).json({
+      res.status(500).json({
         success: false,
-        message: "Invalid username or password",
+        message: "Failed to register user",
       });
     }
   }

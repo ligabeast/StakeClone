@@ -33,6 +33,7 @@
         </button>
         <button
           class="rounded-sm font-semibold whitespace-nowrap ring-offset-background transition disabled:pointer-events-none disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] bg-blue-500 text-white hover:bg-blue-600 hover: focus-visible:outline-white text-sm leading-none shadow-md py-[0.9375rem] px-[1.25rem]"
+          @click="handleRegisterRequest"
         >
           Register
         </button>
@@ -51,7 +52,7 @@ function handleLoginRequest() {
   useMyFetch("/login", {
     method: "POST",
     body: JSON.stringify({
-      username: "test@g.de",
+      username: "test",
       password: "123",
     }),
   })
@@ -62,11 +63,30 @@ function handleLoginRequest() {
 
       const token = useCookie("token");
       token.value = data.token;
-
-      console.log("auth middleware, fetched token");
     })
     .catch((error) => {
-      console.log("auth middlewate, error: ", error);
+      console.log("login failed: ", error);
+    });
+}
+
+function handleRegisterRequest() {
+  useMyFetch("/register", {
+    method: "POST",
+    body: JSON.stringify({
+      username: "test",
+      password: "123",
+    }),
+  })
+    .then((data) => {
+      authStore.setDeposit(data.deposit);
+      authStore.setUsername(data.username);
+      authStore.setToken(data.token);
+
+      const token = useCookie("token");
+      token.value = data.token;
+    })
+    .catch((error) => {
+      console.log("register failed ", error);
     });
 }
 </script>

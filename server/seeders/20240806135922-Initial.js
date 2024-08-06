@@ -13,8 +13,7 @@ module.exports = {
      * }], {});
      */
     const users = Array.from({ length: 1000 }, () => ({
-      name: "John Doe",
-      email: "test@test.de",
+      username: "test",
       password: "password",
     }));
     const transactions = Array.from({ length: 1000 }, () => ({

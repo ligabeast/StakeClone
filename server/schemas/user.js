@@ -7,11 +7,7 @@ const schema = {
     primaryKey: true,
     autoIncrement: true,
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
+  username: {
     type: DataTypes.STRING,
     allowNull: false,
   },
