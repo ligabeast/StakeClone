@@ -1,6 +1,6 @@
 const { Sequelize, DataTypes } = require("sequelize");
 
-const schema = sequelize.define("Bet", {
+const schema = {
   id: {
     type: DataTypes.BIGINT,
     allowNull: false,
@@ -53,15 +53,17 @@ const schema = sequelize.define("Bet", {
     type: DataTypes.DECIMAL(5, 2),
     allowNull: true,
   },
-});
-
-const resolvers = {
-  ...schema,
+  createdAt: {
+    allowNull: false,
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.fn("NOW"),
+  },
+  updatedAt: {
+    allowNull: true,
+    type: Sequelize.DATE,
+  },
 };
-resolvers.currency.defaultValue = undefined;
-resolvers.bet_status.defaultValue = undefined;
 
 module.exports = {
   schema,
-  resolvers,
 };

@@ -4,6 +4,9 @@
     "username": "admin",
     "password": "HSPDkKlUsDtbeDmUWm86",
     "database": "Stake",
-    "dialect": "mariadb"
+    "dialect": "mariadb",
+    "dialectOptions": {
+      "connectTimeout": 3000
+    }
   }
 }

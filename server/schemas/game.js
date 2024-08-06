@@ -5,7 +5,7 @@ const schema = {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
-    type: Sequelize.INTEGER,
+    type: Sequelize.BIGINT,
   },
   name: {
     type: Sequelize.STRING,
@@ -22,12 +22,6 @@ const schema = {
   },
 };
 
-const resolvers = {
-  ...schema,
-};
-resolvers.createdAt.defaultValue = undefined;
-
 module.exports = {
   schema,
-  resolvers,
 };

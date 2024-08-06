@@ -1,5 +1,6 @@
 <template>
-  <p>Home {{ game }}</p>
+  <p>Game: {{ games }}</p>
+  <p>Bets: {{ bets }}</p>
 </template>
 
 <script setup lang="ts">
@@ -7,14 +8,31 @@ definePageMeta({
   layout: "main",
 });
 
-const query = gql`
-  query GetGame($id: ID!) {
-    game(id: $id) {
+const queryGetAllGames = gql`
+  query {
+    games {
       id
       name
     }
   }
 `;
-const variables = { id: 5 };
-const { data: game } = await useAsyncQuery(query, variables);
+const queryGetLast7Bets = gql`
+  query {
+    bets(
+      status: ["won", "lost"]
+      limit: 7
+      order_by: "createdAt"
+      order_dir: "desc"
+    ) {
+      id
+      gameid
+      createdAt
+      bet_status
+      payout
+    }
+  }
+`;
+
+const { data: games } = await useAsyncQuery(queryGetAllGames);
+const { data: bets } = await useAsyncQuery(queryGetLast7Bets);
 </script>

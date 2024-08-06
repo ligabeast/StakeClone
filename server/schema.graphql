@@ -1,6 +1,8 @@
 type Game {
   id: ID!
   name: String!
+  createdAt: String
+  updatedAt: String
 }
 
 type Bet {
@@ -13,9 +15,18 @@ type Bet {
   currency: String!
   bet_status: String!
   odds: Float
+  createdAt: String
+  updatedAt: String
 }
 
 type Query {
   game(id: ID!): Game
   games: [Game!]!
+  bet(id: ID!): Bet
+  bets(
+    status: [String]
+    limit: Int
+    order_by: String
+    order_dir: String
+  ): [Bet!]!
 }
