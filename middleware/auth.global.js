@@ -4,35 +4,33 @@ export default defineNuxtRouteMiddleware((to, from) => {
   if (import.meta.server) {
     return;
   }
-  //store auth.js
   console.log("auth middleware");
-  const authStore = useAuthStore();
-  // get cookie
-  setPageLayout("main");
-  if (authStore.isAuthenticated) {
-    if (decodedToken.exp < currentTime) {
-      console.log("auth middleware, token has expired");
-    } else {
-      console.log("auth middleware, token is valid");
-    }
-    return;
-  } else {
-    console.log("auth middleware, no token");
-    useMyFetch("/login", {
-      method: "POST",
-    })
-      .then((data) => {
-        authStore.setDeposit(data.deposit);
-        authStore.setUsername(data.username);
-        authStore.setToken(data.token);
+  if (import.meta.client) {
+    const token = useCookie("token");
+    token.value = token.value || "";
 
-        // $cookies.set("token", data.token, {
-        //   maxAge: (60 * 60 * 24) / 24 / 60, // 1 minute
-        // });
-        // console.log("auth middleware, fetched token");
+    const authStore = useAuthStore();
+    authStore.setToken(token.value);
+
+    setPageLayout("main");
+    if (!authStore.isAuthenticated) {
+      console.log("auth middleware, no token");
+      useMyFetch("/login", {
+        method: "POST",
       })
-      .catch((error) => {
-        console.log("auth middlewate, error: ", error);
-      });
+        .then((data) => {
+          authStore.setDeposit(data.deposit);
+          authStore.setUsername(data.username);
+          authStore.setToken(data.token);
+
+          token.value = data.token;
+          console.log("auth middleware, fetched token");
+        })
+        .catch((error) => {
+          console.log("auth middlewate, error: ", error);
+        });
+    } else {
+      console.log("auth middleware, token exists");
+    }
   }
 });
