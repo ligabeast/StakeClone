@@ -1,16 +1,15 @@
 <template>
-  <div class="flex flex-col items-center w-full h-full">
-    <div
-      class="w-full h-16 flex items-center justify-center bg-[#0f212e]"
-      id="top"
-    >
+  <div
+    class="flex flex-col items-center h-screen bg-gray-700"
+    :class="computedSidebar"
+  >
+    <div class="w-full h-16 flex items-center justify-center" id="top">
       <svg
         fill="currentColor"
         viewBox="0 0 64 64"
         class="w-4 h-4 fill-[#b1bad3] hover:fill-white transition hover:cursor-pointer"
         @click="emit('toggleSideNavbar', props.open ? false : true)"
       >
-        <title></title>
         <path
           fill-rule="evenodd"
           clip-rule="evenodd"
@@ -25,6 +24,7 @@
 const emit = defineEmits(["toggleSideNavbar"]);
 const props = defineProps({
   open: Boolean,
+  computedSidebar: Object,
 });
 
 onMounted(() => {});

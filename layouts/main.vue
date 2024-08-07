@@ -1,15 +1,31 @@
 <template>
-  <div class="w-full h-full">
-    <div class="flex items-center justify-center w-full h-full">
-      <div class="h-full bg-[#0f212e] shadow-inner" :class="computedSidebar">
-        <SideNavbar
-          @toggleSideNavbar="(e : boolean) => { openSideNavbar = e;}"
-          :open="openSideNavbar"
+  <div class="w-full h-full flex flex-col relative">
+    <SideNavbar
+      class="fixed left-0 top-0 z-50"
+      @toggleSideNavbar="
+        (e) => {
+          openSideNavbar = e;
+        }
+      "
+      :open="openSideNavbar"
+      :computedSidebar="computedSidebar"
+    />
+    <div
+      class="h-full flex flex-col w-full"
+      :class="marginLeftContainer && fullWidthMinusSidebar"
+    >
+      <div class="flex justify-end relative">
+        <TopNavbar
+          class="fixed z-40 h-16 right-0 top-0"
+          :fullWidthMinusSidebar="fullWidthMinusSidebar"
         />
       </div>
-      <div class="h-full flex flex-col bg-[#1a2c38]" :class="computedMain">
-        <div class="w-full h-16 bg-[#1a2c38]"><TopNavbar /></div>
-        <slot></slot>
+      <div
+        class="mt-16 relative px-60 bg-gray-600 w-full"
+        :class="fullWidthMinusSidebar && marginLeftContainer"
+      >
+        <!-- Content -->
+        <slot />
       </div>
     </div>
   </div>
@@ -20,15 +36,20 @@ const openSideNavbar = ref(false);
 
 const computedSidebar = computed(() => {
   return {
-    "w-1/6": openSideNavbar.value,
+    "w-60": openSideNavbar.value,
     "w-16": !openSideNavbar.value,
   };
 });
-
-const computedMain = computed(() => {
+const marginLeftContainer = computed(() => {
   return {
-    "w-5/6": openSideNavbar.value,
-    "w-full": !openSideNavbar.value,
+    "ml-60": openSideNavbar.value,
+    "ml-16": !openSideNavbar.value,
+  };
+});
+const fullWidthMinusSidebar = computed(() => {
+  return {
+    "w-[calc(100vw_-_15rem)]": openSideNavbar.value,
+    "w-[calc(100vw_-_4rem)]": !openSideNavbar.value,
   };
 });
 </script>
