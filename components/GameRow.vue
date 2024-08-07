@@ -10,13 +10,13 @@
           <template v-for="game in props.games">
             <div class="flex flex-col space-y-2">
               <div class="h-40 w-full rounded-md">
-                <a :href="`./game/${game.name}`">
+                <NuxtLink :to="`/casino/game/${game.name}`">
                   <img
                     :src="imageSrc(game.name)"
                     alt="game"
                     class="h-full w-full rounded-md hover:-translate-y-1 transition hover:scale-105 hover:cursor-pointer"
                   />
-                </a>
+                </NuxtLink>
               </div>
               <div class="flex space-x-2 items-center px-1">
                 <div
