@@ -11,6 +11,10 @@ const schema = {
     type: Sequelize.STRING,
     allowNull: false,
   },
+  img: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
   createdAt: {
     allowNull: false,
     type: Sequelize.DATE,

@@ -1,5 +1,7 @@
 <template>
-  <div class="w-full h-full flex flex-col relative overflow-x-hidden">
+  <div
+    class="w-full h-full flex flex-col relative overflow-x-hidden bg-gray-500"
+  >
     <SideNavbar
       class="fixed left-0 top-0 z-50"
       @toggleSideNavbar="
@@ -10,7 +12,10 @@
       :open="openSideNavbar"
       :computedSidebar="computedSidebar"
     />
-    <div class="h-full flex flex-col w-full" :class="fullWidthMinusSidebar">
+    <div
+      class="h-full flex flex-col w-full bg-gray-600"
+      :class="fullWidthMinusSidebar"
+    >
       <div class="flex justify-end">
         <TopNavbar
           class="fixed z-40 h-16 right-0 top-0"
@@ -18,7 +23,7 @@
         />
       </div>
       <div
-        class="mt-16 px-60 bg-gray-600"
+        class="mt-16 px-60"
         :class="{ ...marginLeftContainer, ...fullWidthMinusSidebar }"
       >
         <!-- Content -->

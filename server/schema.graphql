@@ -1,6 +1,7 @@
 type Game {
   id: ID!
   name: String!
+  img: String!
   createdAt: String
   updatedAt: String
 }

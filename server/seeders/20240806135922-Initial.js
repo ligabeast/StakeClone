@@ -23,7 +23,7 @@ module.exports = {
       {
         id: 1,
         userid: 101,
-        gameid: 1,
+        gameid: 2,
         amount: 50.0,
         payout: null,
         transactionid: 100,
@@ -34,7 +34,7 @@ module.exports = {
       {
         id: 2,
         userid: 102,
-        gameid: 4,
+        gameid: 1,
         amount: 75.5,
         payout: 150.0,
         transactionid: 102,
@@ -42,55 +42,15 @@ module.exports = {
         bet_status: "won",
         odds: 2.0,
       },
-      {
-        id: 3,
-        userid: 103,
-        gameid: 3,
-        amount: 25.0,
-        payout: null,
-        transactionid: 103,
-        currency: "GBP",
-        bet_status: "pending",
-        odds: 3.25,
-      },
-      {
-        id: 4,
-        userid: 104,
-        gameid: 2,
-        amount: 100.0,
-        payout: null,
-        transactionid: 104,
-        currency: "USD",
-        bet_status: "lost",
-        odds: 1.75,
-      },
-      {
-        id: 5,
-        userid: 105,
-        gameid: 1,
-        amount: 200.0,
-        payout: 400.0,
-        transactionid: 105,
-        currency: "USD",
-        bet_status: "won",
-        odds: 2.0,
-      },
     ];
     const games = [
       {
-        name: "Roulette",
+        name: "Mines",
+        img: "/assets/games/Mines.jpg",
       },
       {
-        name: "Blackjack",
-      },
-      {
-        name: "Poker",
-      },
-      {
-        name: "Craps",
-      },
-      {
-        name: "Slots",
+        name: "Dice",
+        img: "/assets/games/Dice.jpg",
       },
     ];
     await queryInterface.bulkInsert("Transactions", transactions, {});
