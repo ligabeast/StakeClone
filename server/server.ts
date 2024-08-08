@@ -161,16 +161,16 @@ app.post(
 
     try {
       // Query to get the hashed password from the database
-      const results = await User.findAll({
+      const userFound = await User.findOne({
         where: {
           username,
         },
         attributes: ["password", "deposit", "id"],
       });
-      if (results[0].password) {
-        const storedHashedPassword = results[0].password;
-        const deposit = results[0].deposit;
-        const userid = results[0].id;
+      if (userFound?.password) {
+        const storedHashedPassword = userFound.password;
+        const deposit = userFound.deposit;
+        const userid = userFound.id;
         // Compare the provided password with the stored hashed password
         const isPasswordMatch = await bcrypt.compare(
           password,
