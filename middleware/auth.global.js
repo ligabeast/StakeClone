@@ -1,5 +1,5 @@
 import { useAuthStore } from "~/stores/auth";
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware(async (to, from) => {
   if (import.meta.server) {
     return;
   }
@@ -16,6 +16,18 @@ export default defineNuxtRouteMiddleware((to, from) => {
       console.log("auth middleware, no token");
     } else {
       console.log("auth middleware, token exists");
+      const queryGetDeposit = gql`
+        query {
+          getDepositOfUser(userid: "1")
+        }
+      `;
+      const { data } = await useAsyncQuery(queryGetDeposit);
+
+      authStore.setDeposit(data.value.getDepositOfUser);
+      console.log(
+        "auth middleware, fetched deposit:",
+        data.value.getDepositOfUser
+      );
     }
   }
 });

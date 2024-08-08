@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col space-y-2 px-60 py-4">
+  <div class="flex flex-col space-y-2 px-52 py-4">
     <div class="grid grid-cols-6 gap-8 text-white text-xs py-8">
       <!-- Sport Section -->
       <div>

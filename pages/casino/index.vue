@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col py-8 space-y-8">
-    <div class="flex space-x-5">
+    <div class="flex space-x-5 justify-center">
       <template v-for="card in promocards">
         <PromoCard
           :description="card.description"

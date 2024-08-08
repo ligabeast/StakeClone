@@ -1,7 +1,9 @@
 import { schema as gameResolver } from "./schemas/game.js";
 import { schema as betResolver } from "./schemas/bet.js";
+import { schema as userResolver } from "./schemas/user.js";
 import e = require("express");
 import { where } from "sequelize";
+import { get } from "http";
 
 const resolvers = {
   Query: {
@@ -34,6 +36,17 @@ const resolvers = {
       }
 
       return Bet.findAll(queryOptions);
+    },
+    getDepositOfUser: async (parent, args, context) => {
+      const { userid } = args;
+      const User = context.db.define("User", userResolver);
+      const user = await User.findOne({
+        attributes: ["deposit"],
+        where: {
+          id: userid,
+        },
+      });
+      return user.deposit;
     },
   },
 };

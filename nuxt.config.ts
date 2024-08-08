@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     download: true,
     preload: true,
     families: {
-      Montserrat: [400, 700],
+      Montserrat: [400, 500, 600, 700],
     },
   },
   modules: ["@nuxtjs/google-fonts", "@nuxtjs/apollo"],

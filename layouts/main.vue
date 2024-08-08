@@ -23,7 +23,7 @@
         />
       </div>
       <div
-        class="mt-16 px-60"
+        class="mt-16 px-52"
         :class="{ ...marginLeftContainer, ...fullWidthMinusSidebar }"
       >
         <!-- Content -->

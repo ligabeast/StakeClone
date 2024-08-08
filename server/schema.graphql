@@ -20,6 +20,19 @@ type Bet {
   updatedAt: String
 }
 
+type Deposit {
+  deposit: Float!
+}
+
+type Users {
+  id: ID!
+  username: String!
+  email: String!
+  password: String!
+  createdAt: String
+  updatedAt: String
+}
+
 type Query {
   game(id: ID!): Game
   games: [Game!]!
@@ -30,4 +43,5 @@ type Query {
     order_by: String
     order_dir: String
   ): [Bet!]!
+  getDepositOfUser(userid: ID!): Float
 }

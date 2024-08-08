@@ -118,6 +118,33 @@ app.use(
     },
   })
 );
+
+import { schema as UserSchema } from "./schemas/user.js";
+const User = sequelize.define("User", UserSchema);
+
+// middleware for jwt token
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(403).json({
+      success: false,
+      message: "A token is required for authentication",
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid token",
+    });
+  }
+};
+
 app.post(
   "/login",
   async (
@@ -134,15 +161,16 @@ app.post(
 
     try {
       // Query to get the hashed password from the database
-      const [results] = await sequelize.query(
-        "SELECT u.password FROM Users u WHERE u.username = :username",
-        {
-          replacements: { username },
-          type: Sequelize.QueryTypes.SELECT, // Specify the query type for better result form
-        }
-      );
-      if (results.password) {
-        const storedHashedPassword = results.password;
+      const results = await User.findAll({
+        where: {
+          username,
+        },
+        attributes: ["password", "deposit", "id"],
+      });
+      if (results[0].password) {
+        const storedHashedPassword = results[0].password;
+        const deposit = results[0].deposit;
+        const userid = results[0].id;
         // Compare the provided password with the stored hashed password
         const isPasswordMatch = await bcrypt.compare(
           password,
@@ -160,6 +188,7 @@ app.post(
         const token = generateToken({
           username,
           password: storedHashedPassword,
+          userid,
         });
 
         // Set the token in a cookie
@@ -173,11 +202,11 @@ app.post(
           success: true,
           message: "Login successfully",
           token: token,
-          username: "test",
-          deposit: 50.0,
+          username: username,
+          deposit: deposit,
         });
       } else {
-        return res.status(401).json({
+        return res.status(402).json({
           success: false,
           message: "Invalid username or password",
         });
@@ -207,29 +236,41 @@ app.post(
     const { username, password } = req.body;
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const token = generateToken({
+
+    //check if user already exists
+
+    const checkDb = await User.findAll({
+      where: {
+        username,
+      },
+      attributes: ["id"],
+    });
+
+    if (checkDb.length > 0) {
+      return res.status(401).json({
+        success: false,
+        message: "Username already exists",
+      });
+    }
+
+    const user = await User.create({
       username,
       password: hashedPassword,
     });
 
-    const user = await sequelize.query(
-      "INSERT INTO Users (username, password) VALUES (:username, :password)",
-      {
-        replacements: {
-          username,
-          password: hashedPassword,
-        },
-        type: Sequelize.QueryTypes.SELECT, // Specify the query type for better result form
-      }
-    );
+    const token = generateToken({
+      username,
+      password: hashedPassword,
+      userid: user.id,
+    });
 
     if (user) {
       res.json({
         success: true,
         message: "User registered successfully",
         token: token,
-        username: "test",
-        deposit: 50.0,
+        username: username,
+        deposit: 0,
       });
     } else {
       res.status(500).json({

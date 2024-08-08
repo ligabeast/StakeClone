@@ -13,7 +13,8 @@ module.exports = {
      * }], {});
      */
     const users = Array.from({ length: 1000 }, () => ({
-      username: "test",
+      // generate random username
+      username: Math.random().toString(36).substring(7),
       password: "password",
     }));
     const transactions = Array.from({ length: 1000 }, () => ({

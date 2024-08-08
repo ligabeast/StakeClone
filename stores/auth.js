@@ -17,6 +17,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function setDeposit(newDeposit) {
+    console.log("newDeposit", newDeposit);
     deposit.value = newDeposit;
   }
 
