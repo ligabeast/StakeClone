@@ -1,12 +1,14 @@
 <template>
   <div class="w-full h-full flex flex-col space-y-4 py-8">
     <div class="flex flex-col space-y-0">
-      <div class="w-full h-[600px] bg-black rounded-t-lg">
-        <p class="text-white">{{ requestedGame }}</p>
+      <div class="w-full h-[600px] bg-gray-500 rounded-t-lg">
+        <component :is="GameComponent" />
       </div>
-      <div class="flex justify-between px-8 bg-gray-700 h-16 rounded-b-lg">
+      <div
+        class="flex justify-between items-center px-8 bg-gray-700 h-16 rounded-b-lg border-t-2 border-gray-500"
+      >
         <div class="flex space-x-2 items-center">
-          <Button1 :svg="icons.fullscreen"></Button1>
+          <Button1 :svg="icons.settings"></Button1>
           <Button1 :svg="icons.cinemaMode"></Button1>
           <Button1 :svg="icons.liveStatistics"></Button1>
           <div class="border-r py-5 w-2 border-gray-400"></div>
@@ -33,9 +35,9 @@
             ></path>
           </g>
         </svg>
-        <div>
-          <!-- TODO -->
-        </div>
+        <span class="text-sm px-2 text-gray-200 font-medium select-none"
+          >Fairness</span
+        >
       </div>
     </div>
   </div>
@@ -70,22 +72,12 @@ const queryGetLast7Bets = gql`
 const { data: games } = await useAsyncQuery(queryGetAllGames);
 const { data: bets } = await useAsyncQuery(queryGetLast7Bets);
 
+import CasinoDice from "~/components/CasinoDice.vue";
+import CasinoMines from "~/components/CasinoMines.vue";
+
 const icons = {
-  fullscreen: `
-        <svg
-          fill="currentColor"
-          viewBox="0 0 64 64"
-          class="svg-icon"
-          style=""
-        >
-          <title></title>
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M0 25h8V8h17V0H0v25Zm56 0h8V0H39v8h17v17ZM25 64H0V39h8v17h17v8Zm14 0h25V39h-8v17H39v8Z"
-          ></path>
-        </svg>
-        `,
+  settings:
+    '<svg fill="currentColor" viewBox="0 0 64 64" class="svg-icon " style=""> <title></title> <path d="M55.441 32a26.082 26.082 0 0 0-.34-3.99l.02.15 8.16-6-7.12-12.32-9.254 4.054a23.83 23.83 0 0 0-6.502-3.784l-.164-.056L39.121 0h-14.24l-1.12 10.054c-2.554.98-4.76 2.276-6.71 3.874l.042-.034L7.84 9.84.72 22.16l8.16 6a25.007 25.007 0 0 0-.32 3.828V32c.012 1.366.128 2.694.34 3.99l-.02-.15-8.16 6 7.12 12.32 9.254-4.054a23.83 23.83 0 0 0 6.502 3.784l.164.056L24.88 64h14.24l1.12-10.054c2.554-.98 4.76-2.276 6.71-3.874l-.042.034 9.254 4.054 7.12-12.32-8.16-6c.192-1.146.308-2.474.32-3.828V32Zm-23.44 8.666A8.666 8.666 0 1 1 40.667 32c-.016 4.78-3.886 8.652-8.666 8.666H32h.002Z"></path></svg> ',
   cinemaMode:
     '<svg fill="currentColor" viewBox="0 0 64 64" class="svg-icon " style=""> <title></title> <path d="M64 58.5H0v-53h64v53Zm-56-8h48v-37H8v37Z"></path></svg>',
   liveStatistics:
@@ -93,6 +85,18 @@ const icons = {
 };
 
 const route = useRoute();
-const requestedGame = route.params.name;
-console.log(requestedGame);
+const requestedGame = route.params.name as string;
+
+const resolveComponent = (game: string) => {
+  switch (game) {
+    case "Dice":
+      return CasinoDice;
+    case "Mines":
+      return CasinoMines;
+    default:
+      return null; // or a fallback component
+  }
+};
+
+const GameComponent = resolveComponent(requestedGame);
 </script>
