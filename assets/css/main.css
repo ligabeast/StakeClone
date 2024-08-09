@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .scrollbar-firefox-custom {
+    scrollbar-width: thin;
+    scrollbar-color: #2f4553 #0f212e !important;
+  }
+  .scrollbar-firefox-custom:hover {
+    scrollbar-color: #557086;
+  }
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: #2f4553;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: #557086 !important;
+  }
+}
+
 * {
   font-family: Montserrat, sans-serif;
   font-weight: 400;

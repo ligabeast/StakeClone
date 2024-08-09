@@ -18,7 +18,7 @@
     >
       <div class="flex justify-end">
         <TopNavbar
-          class="fixed z-40 h-16 right-0 top-0"
+          class="fixed z-20 h-16 right-0 top-0"
           :fullWidthMinusSidebar="fullWidthMinusSidebar"
         />
       </div>
