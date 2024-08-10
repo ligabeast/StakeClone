@@ -11,6 +11,7 @@
 
 <script setup lang="ts">
 const formattedAmount = computed(() => {
+  if (!props.amount) return "0.00";
   return (props.amount * props.multiplicator).toFixed(2);
 });
 const props = defineProps<{

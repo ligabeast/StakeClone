@@ -13,7 +13,6 @@
     "@nuxtjs/google-fonts": "^3.2.0",
     "nuxt": "^3.12.2",
     "pinia": "^2.2.1",
-    "sequelize": "^6.37.3",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },

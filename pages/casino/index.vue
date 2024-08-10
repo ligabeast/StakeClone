@@ -13,7 +13,7 @@
     <SelectionBar :icons="icons" />
     <GameRow
       :name="'Stake Originals'"
-      :games="games?.games"
+      :games="games"
       :icon="icons['Stake Originals']"
     />
   </div>
@@ -32,10 +32,18 @@ const queryGetAllGames = gql`
     }
   }
 `;
+const games: Ref<{ name: string; img: string }[]> = ref([]);
 
-const { data: games } = await useAsyncQuery<{
-  games: { name: string; img: string }[];
-}>(queryGetAllGames);
+onMounted(async () => {
+  try {
+    const { data } = await useAsyncQuery<{
+      games: { name: string; img: string }[];
+    }>(queryGetAllGames);
+    games.value = data.value?.games ?? [];
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 const promocards = [
   {

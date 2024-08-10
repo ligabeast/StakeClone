@@ -17,8 +17,16 @@
     </div>
     <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
       <div></div>
-      <div class="flex justify-center items-center">Platzhalter</div>
-      <DiceOddSelector />
+      <div class="flex justify-center items-center">
+        <DiceOddSelector v-model="sliderPrecentage" :overMode="overMode" />
+      </div>
+      <DiceOddBar
+        :multiplier="multiplicator"
+        :rollUnder="rollUnder"
+        :winChance="winChance"
+        :overMode="overMode"
+        @click="handleOddItemClick"
+      />
     </div>
   </div>
 </template>
@@ -26,6 +34,26 @@
 <script setup lang="ts">
 const amount = ref("");
 const amountError = ref(false);
+
+const mode = ref("manu");
+const sliderPrecentage = ref(50);
+const overMode = ref(true);
+
+const multiplicator = computed(() => {
+  return 100 / sliderPrecentage.value;
+});
+
+const rollUnder = computed(() => {
+  if (overMode.value) {
+    return 100 - sliderPrecentage.value;
+  } else {
+    return sliderPrecentage.value;
+  }
+});
+
+const winChance = computed(() => {
+  return overMode.value ? sliderPrecentage.value : 100 - sliderPrecentage.value;
+});
 
 function handleAmountChange(newAmount: string) {
   const regex = /^\d+((\.|\,)\d\d?)?$/;
@@ -60,6 +88,16 @@ function handleHalveAmount() {
   amount.value = (convert / 2).toFixed(2).toString();
 }
 
-const mode = ref("manu");
-const multiplicator = ref(2);
+function handleOddItemClick(item: {
+  title: string;
+  icon: string;
+  value: string;
+  clickable: boolean;
+}) {
+  if (item.title === "Roll Under") {
+    overMode.value = true;
+  } else if (item.title === "Roll Over") {
+    overMode.value = false;
+  }
+}
 </script>
