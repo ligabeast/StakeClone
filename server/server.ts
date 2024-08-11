@@ -315,7 +315,8 @@ app.post(
       success: boolean;
       message: string;
       randomNumber?: number;
-      win?: number;
+      newBalance?: number;
+      error?: string;
     }>
   ) => {
     const { rollMode, rollValue, amount } = req.body;
@@ -358,8 +359,6 @@ app.post(
     const lcg = new LCG(generatedSeed);
     const randomNumber = lcg.next();
 
-    const transaction = await sequelize.transaction();
-
     const rollValueDecimal = Number("0." + rollValue);
 
     const userHasWon =
@@ -377,13 +376,21 @@ app.post(
       attributes: ["deposit", "id"],
     });
 
+    if (potentialWin + user.deposit === user.deposit) {
+      return res.json({
+        success: userHasWon,
+        message: userHasWon ? "You won!" : "You lost!",
+        randomNumber,
+        newBalance: user.deposit,
+      });
+    }
+
+    const transaction = await sequelize.transaction();
     try {
       const { referenceId } = await storeDiceBet({
         amountFixed,
         rollValue,
         rollMode,
-        req,
-        res,
         transaction,
         odd,
         potentialWin,
@@ -392,6 +399,7 @@ app.post(
       });
 
       if (user.deposit < amountFixed) {
+        await transaction.commit();
         return res.json({
           success: false,
           message: "Insufficient funds",
@@ -419,13 +427,13 @@ app.post(
             transaction,
           }
         );
-
+        console.log("User won");
         await transaction.commit();
         return res.json({
           success: true,
           message: "You won!",
           randomNumber,
-          win: potentialWin,
+          newBalance: potentialWin + user.deposit,
         });
       } else {
         await transaction.commit();
@@ -433,6 +441,7 @@ app.post(
           success: false,
           message: "You lost!",
           randomNumber,
+          newBalance: user.deposit - amountFixed,
         });
       }
     } catch (error) {
@@ -441,6 +450,7 @@ app.post(
       return res.status(500).json({
         success: false,
         message: "An error occurred while playing dice.",
+        error: error,
       });
     }
   }
@@ -450,8 +460,6 @@ async function storeDiceBet({
   amountFixed,
   rollValue,
   rollMode,
-  req,
-  res,
   transaction,
   odd,
   potentialWin,
@@ -461,8 +469,6 @@ async function storeDiceBet({
   amountFixed: number;
   rollValue: number;
   rollMode: string;
-  req: Request;
-  res: Response;
   odd: number;
   potentialWin: number;
   userHasWon: boolean;

@@ -15,8 +15,8 @@
             <span
               class="text-sm font-medium z-10"
               :class="{
-                'text-red-500': props.lastBet.win,
-                'text-green-500': !props.lastBet.win,
+                'text-red-500': !props.lastBet.win,
+                'text-green-500': props.lastBet.win,
               }"
               >{{ (lastBet.value * 100).toFixed(2) }}%</span
             >

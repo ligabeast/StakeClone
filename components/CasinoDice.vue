@@ -5,14 +5,12 @@
       <BetAmountSelector
         :amount="amount"
         :amount-error="amountError"
+        :deposit="authStore.deposit"
         @amountchange="handleAmountChange"
         @doubleamount="handleDoubleAmount"
         @halveamount="handleHalveAmount"
       />
-      <ProfitView
-        :multiplicator="multiplicator"
-        :amount="Number.parseFloat(amount) ?? 0"
-      />
+      <ProfitView :multiplicator="multiplicator" :amount="amountConverted" />
       <BetButton @clicked="handleRequestBet" />
     </div>
     <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
@@ -57,7 +55,11 @@ const lastBet = ref({
 const authStore = useAuthStore();
 
 const multiplicator = computed(() => {
-  return 100 / sliderPrecentage.value;
+  return 100.0 / sliderPrecentage.value;
+});
+
+const amountConverted = computed(() => {
+  return Number.parseFloat(amount.value);
 });
 
 const rollUnder = computed(() => {
@@ -89,6 +91,8 @@ function handleAmountChange(newAmount: string) {
   // Check if the number has one digit after the decimal like "23.1"
   else if (/^\d+\.\d$/.test(newAmount)) {
     amount.value = newAmount + "0";
+  } else {
+    amount.value = newAmount;
   }
   amount.value = amount.value.replace(",", ".");
 }
@@ -97,6 +101,7 @@ async function handleRequestBet() {
   if (showBet.value) return;
   showBet.value = false;
   if (amountError.value) return;
+  if (Number.parseFloat(amount.value) > authStore.deposit) return;
   if (connectionCounter.value > 0) return;
   authStore.subtractDeposit(Number.parseFloat(amount.value ?? "0.00"));
   connectionCounter.value += 1;
@@ -115,9 +120,7 @@ async function handleRequestBet() {
       connectionCounter.value -= 1;
     });
   if (!data) return;
-  if (data.success) {
-    authStore.addDeposit(data.win);
-  }
+  authStore.setDeposit(data.newBalance);
   lastBet.value = {
     value: data.randomNumber,
     win: Boolean(data.success),
@@ -131,7 +134,12 @@ async function handleRequestBet() {
 function handleDoubleAmount() {
   if (!amount.value) return;
   const convert = Number.parseFloat(amount.value);
-  amount.value = (convert * 2).toFixed(2).toString();
+
+  if (convert * 2 > authStore.deposit) {
+    amount.value = authStore.deposit.toFixed(2).toString();
+  } else {
+    amount.value = (convert * 2).toFixed(2).toString();
+  }
 }
 
 function handleHalveAmount() {

@@ -7,8 +7,11 @@
           type="text"
           v-model="amount"
           placeholder="0.00"
-          class="w-full text-sm h-full bg-transparent focus:outline-none focus:placeholder-transparent text-white placeholder-white px-2 focus:ring-[1.5px] group-hover:ring-[1.5px] group-hover:ring-gray-300 focus:ring-gray-300 rounded-sm"
-          :class="{ 'ring-[1.5px] ring-red-500': props.amountError }"
+          class="w-full text-sm h-full bg-transparent focus:outline-none focus:placeholder-transparent text-white placeholder-white px-2 focus:ring-[1.5px] focus:ring-gray-300 rounded-sm"
+          :class="{
+            'ring-[1.5px] ring-red-500':
+              props.amountError || props.deposit < Number.parseFloat(amount),
+          }"
           @change="emit('amountchange', amount)"
         />
       </div>
@@ -32,7 +35,11 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ amount: string; amountError: boolean }>();
+const props = defineProps<{
+  amount: string;
+  amountError: boolean;
+  deposit: number;
+}>();
 const emit = defineEmits(["amountchange", "doubleamount", "halveamount"]);
 const amount = ref(props.amount);
 
