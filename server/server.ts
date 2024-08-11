@@ -11,7 +11,6 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import type { Request, Response } from "express";
 import type { CorsOptions } from "cors";
 import resolvers from "./resolvers";
-import { TIMEOUT } from "dns";
 
 const { Sequelize } = require("sequelize");
 const jwt = require("jsonwebtoken");
@@ -21,6 +20,7 @@ import Express from "express";
 import { Query, Send } from "express-serve-static-core";
 
 import bcrypt from "bcrypt";
+import { generateSeed, LCG } from "./utils";
 
 interface TypedRequestQuery<T extends Query> extends Express.Request {
   query: T;
@@ -120,7 +120,19 @@ app.use(
 );
 
 import { schema as UserSchema } from "./schemas/user.js";
-const User = sequelize.define("User", UserSchema);
+import { schema as DiceBetSchema } from "./schemas/diceBet.js";
+import { schema as BetSchema } from "./schemas/bet.js";
+import { schema as TransactionSchema } from "./schemas/transaction.js";
+import { schema as GameSchema } from "./schemas/game.js";
+import { timeStamp } from "console";
+
+const User = sequelize.define("Users", UserSchema);
+const DiceBet = sequelize.define("DiceBets", DiceBetSchema, {
+  timestamps: false,
+});
+const Bet = sequelize.define("Bets", BetSchema);
+const Transaction = sequelize.define("Transactions", TransactionSchema);
+const Game = sequelize.define("Games", GameSchema);
 
 // middleware for jwt token
 const verifyToken = (req, res, next) => {
@@ -290,3 +302,204 @@ app.listen(port, async () => {
     console.error("Unable to connect to the DB:", error);
   }
 });
+
+app.post("/play/dice", async (req, res) => {
+  const { rollMode, rollValue, amount } = req.body;
+
+  if (!rollMode || !rollValue || !amount) {
+    return res.json({
+      success: false,
+      message: "Please provide all the required fields",
+    });
+  }
+
+  if (rollValue < 1 || rollValue > 99) {
+    return res.json({
+      success: false,
+      message: "Roll value should be between 1 and 99",
+    });
+  }
+
+  if (amount < 1) {
+    return res.json({
+      success: false,
+      message: "Amount should be greater than 0",
+    });
+  }
+
+  if (rollMode !== "Roll Under" && rollMode !== "Roll Over") {
+    return res.json({
+      success: false,
+      message: "Roll mode should be either 'Roll Under' or 'Roll Over'",
+    });
+  }
+  // Take only the first two digits
+  const amountFixed = Number(amount.toFixed(2));
+  const winChance =
+    (rollMode === "Roll Over" ? 100 - rollValue : rollValue) / 100;
+  const odd = 1 / winChance;
+  const potentialWin = amountFixed * odd;
+
+  const generatedSeed = generateSeed();
+  const lcg = new LCG(generatedSeed);
+  const randomNumber = lcg.next();
+
+  const transaction = await sequelize.transaction();
+
+  const rollValueDecimal = Number("0." + rollValue);
+
+  const userHasWon =
+    (rollMode === "Roll Over" && randomNumber > rollValueDecimal) ||
+    (rollMode === "Roll Under" && randomNumber < rollValueDecimal);
+
+  const authorization = req.headers.authorization;
+  const token = authorization.split(" ")[1];
+  const { username } = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+  const user = await User.findOne({
+    where: {
+      username,
+    },
+    attributes: ["deposit", "id"],
+  });
+
+  try {
+    const { referenceId } = await storeDiceBet({
+      amountFixed,
+      rollValue,
+      rollMode,
+      req,
+      res,
+      transaction,
+      odd,
+      potentialWin,
+      userHasWon,
+      user,
+    });
+
+    if (user.deposit < amountFixed) {
+      return res.json({
+        success: false,
+        message: "Insufficient funds",
+      });
+    }
+
+    if (userHasWon) {
+      const message = `Won ${amountFixed}$ on a ${rollMode} of ${rollValue}`;
+      Transaction.create(
+        {
+          message,
+          amount: potentialWin,
+          userId: user.id,
+          referenceId: referenceId,
+          transactionType: "win",
+        },
+        { transaction }
+      );
+      await User.update(
+        { deposit: user.deposit + potentialWin },
+        {
+          where: {
+            id: user.id,
+          },
+          transaction,
+        }
+      );
+
+      await transaction.commit();
+      return res.json({
+        success: true,
+        message: "You won!",
+        randomNumber,
+      });
+    } else {
+      await transaction.commit();
+      return res.json({
+        success: false,
+        message: "You lost!",
+        randomNumber,
+      });
+    }
+  } catch (error) {
+    console.error("Error during dice play:", error);
+    await transaction.rollback();
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while playing dice.",
+    });
+  }
+});
+
+async function storeDiceBet({
+  amountFixed,
+  rollValue,
+  rollMode,
+  req,
+  res,
+  transaction,
+  odd,
+  potentialWin,
+  userHasWon,
+  user,
+}: {
+  amountFixed: number;
+  rollValue: number;
+  rollMode: string;
+  req: Request;
+  res: Response;
+  odd: number;
+  potentialWin: number;
+  userHasWon: boolean;
+  transaction: any;
+  user: { deposit: number; id: number };
+}): Promise<{ referenceId: number }> {
+  const message = `Placed a bet of ${potentialWin}$ on a Dice Roll`;
+
+  const game = await Game.findOne({
+    where: {
+      name: "Dice",
+    },
+    attributes: ["id"],
+  });
+
+  await User.update(
+    { deposit: user.deposit - amountFixed },
+    {
+      where: {
+        id: user.id,
+      },
+      transaction,
+    }
+  );
+
+  const diceBet = await DiceBet.create({
+    rollMode,
+    rollValue,
+  });
+
+  const bet = await Bet.create(
+    {
+      userId: user.id,
+      gameId: game.id,
+      amount: amountFixed,
+      payout: potentialWin,
+      referenceId: diceBet.id,
+      betStatus: userHasWon ? "win" : "lose",
+      odd,
+    },
+    { transaction }
+  );
+
+  await Transaction.create(
+    {
+      message,
+      amount: amountFixed,
+      userId: user.id,
+      referenceId: bet.id,
+      transactionType: "bet",
+    },
+    { transaction }
+  );
+
+  return { referenceId: bet.id };
+}

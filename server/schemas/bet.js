@@ -7,7 +7,7 @@ const schema = {
     primaryKey: true,
     autoIncrement: true,
   },
-  userid: {
+  userId: {
     type: DataTypes.BIGINT,
     allowNull: false,
     references: {
@@ -15,7 +15,7 @@ const schema = {
       key: "id",
     },
   },
-  gameid: {
+  gameId: {
     type: DataTypes.BIGINT,
     allowNull: false,
     references: {
@@ -29,29 +29,26 @@ const schema = {
   },
   payout: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: true,
+    allowNull: false,
   },
-  transactionid: {
+  // ref to game specific bet
+  referenceId: {
     type: DataTypes.BIGINT,
     allowNull: false,
-    references: {
-      model: "Transactions",
-      key: "id",
-    },
   },
   currency: {
     type: DataTypes.STRING(3),
     allowNull: false,
     defaultValue: "USD",
   },
-  bet_status: {
+  betStatus: {
     type: DataTypes.STRING(20),
     allowNull: false,
     defaultValue: "pending",
   },
-  odds: {
+  odd: {
     type: DataTypes.DECIMAL(5, 2),
-    allowNull: true,
+    allowNull: false,
   },
   createdAt: {
     allowNull: false,
