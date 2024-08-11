@@ -7,7 +7,7 @@
       :class="{ 'hover:cursor-pointer': props.clickable }"
     >
       <span class="text-white text-sm font-medium select-none">{{
-        props.value
+        Number.parseFloat(props.value).toFixed(2)
       }}</span>
       <div v-html="props.icon" class="w-4 text-gray-200"></div>
     </div>

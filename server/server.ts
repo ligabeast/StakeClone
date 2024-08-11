@@ -303,132 +303,148 @@ app.listen(port, async () => {
   }
 });
 
-app.post("/play/dice", async (req, res) => {
-  const { rollMode, rollValue, amount } = req.body;
+app.post(
+  "/play/dice",
+  async (
+    req: TypedRequestBody<{
+      rollMode: string;
+      rollValue: number;
+      amount: number;
+    }>,
+    res: TypedResponse<{
+      success: boolean;
+      message: string;
+      randomNumber?: number;
+      win?: number;
+    }>
+  ) => {
+    const { rollMode, rollValue, amount } = req.body;
 
-  if (!rollMode || !rollValue || !amount) {
-    return res.json({
-      success: false,
-      message: "Please provide all the required fields",
-    });
-  }
-
-  if (rollValue < 1 || rollValue > 99) {
-    return res.json({
-      success: false,
-      message: "Roll value should be between 1 and 99",
-    });
-  }
-
-  if (amount < 1) {
-    return res.json({
-      success: false,
-      message: "Amount should be greater than 0",
-    });
-  }
-
-  if (rollMode !== "Roll Under" && rollMode !== "Roll Over") {
-    return res.json({
-      success: false,
-      message: "Roll mode should be either 'Roll Under' or 'Roll Over'",
-    });
-  }
-  // Take only the first two digits
-  const amountFixed = Number(amount.toFixed(2));
-  const winChance =
-    (rollMode === "Roll Over" ? 100 - rollValue : rollValue) / 100;
-  const odd = 1 / winChance;
-  const potentialWin = amountFixed * odd;
-
-  const generatedSeed = generateSeed();
-  const lcg = new LCG(generatedSeed);
-  const randomNumber = lcg.next();
-
-  const transaction = await sequelize.transaction();
-
-  const rollValueDecimal = Number("0." + rollValue);
-
-  const userHasWon =
-    (rollMode === "Roll Over" && randomNumber > rollValueDecimal) ||
-    (rollMode === "Roll Under" && randomNumber < rollValueDecimal);
-
-  const authorization = req.headers.authorization;
-  const token = authorization.split(" ")[1];
-  const { username } = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-  const user = await User.findOne({
-    where: {
-      username,
-    },
-    attributes: ["deposit", "id"],
-  });
-
-  try {
-    const { referenceId } = await storeDiceBet({
-      amountFixed,
-      rollValue,
-      rollMode,
-      req,
-      res,
-      transaction,
-      odd,
-      potentialWin,
-      userHasWon,
-      user,
-    });
-
-    if (user.deposit < amountFixed) {
+    if (!rollMode || !rollValue || (!amount && amount !== 0)) {
       return res.json({
         success: false,
-        message: "Insufficient funds",
+        message: "Please provide all the required fields",
       });
     }
 
-    if (userHasWon) {
-      const message = `Won ${amountFixed}$ on a ${rollMode} of ${rollValue}`;
-      Transaction.create(
-        {
-          message,
-          amount: potentialWin,
-          userId: user.id,
-          referenceId: referenceId,
-          transactionType: "win",
-        },
-        { transaction }
-      );
-      await User.update(
-        { deposit: user.deposit + potentialWin },
-        {
-          where: {
-            id: user.id,
+    if (rollValue < 1 || rollValue > 99) {
+      return res.json({
+        success: false,
+        message: "Roll value should be between 1 and 99",
+      });
+    }
+
+    if (amount < 0) {
+      return res.json({
+        success: false,
+        message: "Amount should be greater than 0",
+      });
+    }
+
+    if (rollMode !== "Roll Under" && rollMode !== "Roll Over") {
+      return res.json({
+        success: false,
+        message: "Roll mode should be either 'Roll Under' or 'Roll Over'",
+      });
+    }
+    // Take only the first two digits
+    const amountFixed = Number(amount.toFixed(2));
+    const winChance =
+      (rollMode === "Roll Over" ? 100 - rollValue : rollValue) / 100;
+    const odd = 1 / winChance;
+    const potentialWin = amountFixed * odd;
+
+    const generatedSeed = generateSeed();
+    const lcg = new LCG(generatedSeed);
+    const randomNumber = lcg.next();
+
+    const transaction = await sequelize.transaction();
+
+    const rollValueDecimal = Number("0." + rollValue);
+
+    const userHasWon =
+      (rollMode === "Roll Over" && randomNumber > rollValueDecimal) ||
+      (rollMode === "Roll Under" && randomNumber < rollValueDecimal);
+
+    const authorization = req.headers.authorization;
+    const token = authorization.split(" ")[1];
+    const { username } = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+    const user = await User.findOne({
+      where: {
+        username,
+      },
+      attributes: ["deposit", "id"],
+    });
+
+    try {
+      const { referenceId } = await storeDiceBet({
+        amountFixed,
+        rollValue,
+        rollMode,
+        req,
+        res,
+        transaction,
+        odd,
+        potentialWin,
+        userHasWon,
+        user,
+      });
+
+      if (user.deposit < amountFixed) {
+        return res.json({
+          success: false,
+          message: "Insufficient funds",
+        });
+      }
+
+      if (userHasWon) {
+        const message = `Won ${amountFixed}$ on a ${rollMode} of ${rollValue}`;
+        Transaction.create(
+          {
+            message,
+            amount: potentialWin,
+            userId: user.id,
+            referenceId: referenceId,
+            transactionType: "win",
           },
-          transaction,
-        }
-      );
+          { transaction }
+        );
+        await User.update(
+          { deposit: user.deposit + potentialWin },
+          {
+            where: {
+              id: user.id,
+            },
+            transaction,
+          }
+        );
 
-      await transaction.commit();
-      return res.json({
-        success: true,
-        message: "You won!",
-        randomNumber,
-      });
-    } else {
-      await transaction.commit();
-      return res.json({
+        await transaction.commit();
+        return res.json({
+          success: true,
+          message: "You won!",
+          randomNumber,
+          win: potentialWin,
+        });
+      } else {
+        await transaction.commit();
+        return res.json({
+          success: false,
+          message: "You lost!",
+          randomNumber,
+        });
+      }
+    } catch (error) {
+      console.error("Error during dice play:", error);
+      await transaction.rollback();
+      return res.status(500).json({
         success: false,
-        message: "You lost!",
-        randomNumber,
+        message: "An error occurred while playing dice.",
       });
     }
-  } catch (error) {
-    console.error("Error during dice play:", error);
-    await transaction.rollback();
-    return res.status(500).json({
-      success: false,
-      message: "An error occurred while playing dice.",
-    });
   }
-});
+);
 
 async function storeDiceBet({
   amountFixed,

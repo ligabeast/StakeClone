@@ -13,12 +13,17 @@
         :multiplicator="multiplicator"
         :amount="Number.parseFloat(amount) ?? 0"
       />
-      <BetButton />
+      <BetButton @clicked="handleRequestBet" />
     </div>
     <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
       <div></div>
       <div class="flex justify-center items-center">
-        <DiceOddSelector v-model="sliderPrecentage" :overMode="overMode" />
+        <DiceOddSelector
+          v-model="sliderPrecentage"
+          :overMode="overMode"
+          :last-bet="lastBet"
+          :showBet="showBet"
+        />
       </div>
       <DiceOddBar
         :multiplier="multiplicator"
@@ -32,12 +37,24 @@
 </template>
 
 <script setup lang="ts">
+import { useMyFetch } from "~/composable/useMyFetch";
+import { useAuthStore } from "~/stores/auth";
+
 const amount = ref("");
 const amountError = ref(false);
 
 const mode = ref("manu");
 const sliderPrecentage = ref(50);
 const overMode = ref(true);
+const connectionCounter = ref(0);
+
+const showBet = ref(false);
+const lastBet = ref({
+  value: 0,
+  win: false,
+});
+
+const authStore = useAuthStore();
 
 const multiplicator = computed(() => {
   return 100 / sliderPrecentage.value;
@@ -45,14 +62,14 @@ const multiplicator = computed(() => {
 
 const rollUnder = computed(() => {
   if (overMode.value) {
-    return 100 - sliderPrecentage.value;
-  } else {
     return sliderPrecentage.value;
+  } else {
+    return 100 - sliderPrecentage.value;
   }
 });
 
 const winChance = computed(() => {
-  return overMode.value ? sliderPrecentage.value : 100 - sliderPrecentage.value;
+  return overMode.value ? 100 - sliderPrecentage.value : sliderPrecentage.value;
 });
 
 function handleAmountChange(newAmount: string) {
@@ -74,6 +91,40 @@ function handleAmountChange(newAmount: string) {
     amount.value = newAmount + "0";
   }
   amount.value = amount.value.replace(",", ".");
+}
+
+async function handleRequestBet() {
+  if (showBet.value) return;
+  showBet.value = false;
+  if (amountError.value) return;
+  if (connectionCounter.value > 0) return;
+  authStore.subtractDeposit(Number.parseFloat(amount.value ?? "0.00"));
+  connectionCounter.value += 1;
+  const data = await useMyFetch("/play/dice", {
+    method: "POST",
+    body: JSON.stringify({
+      rollMode: overMode.value ? "Roll Over" : "Roll Under",
+      rollValue: rollUnder.value,
+      amount: Number.parseFloat(amount.value !== "" ? amount.value : "0.00"),
+    }),
+  })
+    .catch((err) => {
+      console.error(err);
+    })
+    .finally(() => {
+      connectionCounter.value -= 1;
+    });
+  if (data.success) {
+    authStore.addDeposit(data.win);
+  }
+  lastBet.value = {
+    value: data.randomNumber,
+    win: Boolean(data.success),
+  };
+  showBet.value = true;
+  setTimeout(() => {
+    if (connectionCounter.value === 0) showBet.value = false;
+  }, 1000);
 }
 
 function handleDoubleAmount() {

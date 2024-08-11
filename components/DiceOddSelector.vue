@@ -5,6 +5,43 @@
         class="w-full h-full flex justify-center items-center relative"
         ref="track"
       >
+        <transition>
+          <div
+            class="absolute -translate-y-10 h-20 w-20 flex items-center justify-center z-0"
+            :style="{ left: `${lastX - 40}px` }"
+            mode="out-in"
+            v-if="showBet"
+          >
+            <span
+              class="text-sm font-medium z-10"
+              :class="{
+                'text-red-500': props.lastBet.win,
+                'text-green-500': !props.lastBet.win,
+              }"
+              >{{ (lastBet.value * 100).toFixed(2) }}%</span
+            >
+            <svg
+              class="h-20 absolute"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 45.55 51.32"
+            >
+              <g id="games">
+                <path
+                  class="cls-1"
+                  d="M43.28,11.13,25.05.61a4.56,4.56,0,0,0-4.55,0L2.28,11.13A4.55,4.55,0,0,0,0,15.07v21a4.55,4.55,0,0,0,2.28,3.94L20.5,50.58a4.56,4.56,0,0,0,4.55,0L43.28,40.06a4.56,4.56,0,0,0,2.27-3.94v-21A4.56,4.56,0,0,0,43.28,11.13Z"
+                />
+                <path
+                  class="cls-2"
+                  d="M21.13,24.64,1.85,13.51A1.23,1.23,0,0,0,0,14.57v22a3.69,3.69,0,0,0,1.84,3.19l19.09,11a3.69,3.69,0,0,0,1.85.49,34.48,34.48,0,0,0,0-23.82A3.3,3.3,0,0,0,21.13,24.64Z"
+                />
+                <path
+                  class="cls-3"
+                  d="M43.7,13.51,24.42,24.64a3.3,3.3,0,0,0-1.64,2.86V51.32a3.68,3.68,0,0,0,1.84-.49l19.09-11a3.69,3.69,0,0,0,1.84-3.19v-22A1.23,1.23,0,0,0,43.7,13.51Z"
+                />
+              </g>
+            </svg>
+          </div>
+        </transition>
         <div
           class="h-full rounded-l-full"
           :style="{
@@ -33,19 +70,14 @@
   </div>
 </template>
 
-<style scoped>
-#slider {
-  position: absolute;
-  translate: var(--x) 0;
-}
-</style>
-
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 
 const props = defineProps<{
   modelValue: number;
   overMode: boolean;
+  showBet: boolean;
+  lastBet: { value: number; win: boolean };
 }>();
 
 const track = ref<HTMLElement | null>(null);
@@ -57,6 +89,10 @@ const minValue = 0;
 const maxValue = 100;
 
 const emits = defineEmits(["update:modelValue"]);
+
+const lastX = computed(() => {
+  return props.lastBet.value * (track.value?.clientWidth ?? 0);
+});
 
 // Calculate the current value based on slider position
 const currentValue = computed(() => {
@@ -124,3 +160,28 @@ onMounted(() => {
   }
 });
 </script>
+
+<style scoped>
+#slider {
+  position: absolute;
+  translate: var(--x) 0;
+}
+.cls-1 {
+  fill: #fff;
+}
+.cls-2 {
+  fill: #e9f0f5;
+}
+.cls-3 {
+  fill: #d3dee6;
+}
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+</style>

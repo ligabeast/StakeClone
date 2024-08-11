@@ -16,7 +16,9 @@
         >
           <span></span>
           <div class="text-sm text-gray-300 flex space-x-2">
-            <span class="font-medium text-white select-none">{{ deposit }}</span
+            <span class="font-medium text-white select-none">{{
+              deposit.toFixed(2)
+            }}</span
             ><span class="select-none">$</span>
           </div>
           <svg
@@ -127,7 +129,7 @@ import { useAuthStore } from "~/stores/auth";
 const authStore = useAuthStore();
 const cookie = useCookie("token");
 
-const deposit = ref(authStore.deposit);
+const deposit = computed(() => authStore.deposit);
 
 const props = defineProps<{
   fullWidthMinusSidebar: Object;

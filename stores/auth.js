@@ -17,8 +17,15 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function setDeposit(newDeposit) {
-    console.log("newDeposit", newDeposit);
     deposit.value = newDeposit;
+  }
+
+  function addDeposit(amount) {
+    deposit.value += amount;
+  }
+
+  function subtractDeposit(amount) {
+    deposit.value -= amount;
   }
 
   function reset() {
@@ -39,6 +46,8 @@ export const useAuthStore = defineStore("auth", () => {
     deposit,
     reset,
     // Expose actions
+    addDeposit,
+    subtractDeposit,
     setToken,
     setUsername,
     setDeposit,
