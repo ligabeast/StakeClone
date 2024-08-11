@@ -429,7 +429,6 @@ app.post(
             transaction,
           }
         );
-        console.log("User won");
         await transaction.commit();
         return res.json({
           success: true,
