@@ -114,6 +114,7 @@ async function handleRequestBet() {
     .finally(() => {
       connectionCounter.value -= 1;
     });
+  if (!data) return;
   if (data.success) {
     authStore.addDeposit(data.win);
   }
