@@ -399,12 +399,14 @@ app.post(
       });
 
       if (user.deposit < amountFixed) {
-        await transaction.commit();
+        await transaction.rollback();
         return res.json({
           success: false,
           message: "Insufficient funds",
         });
       }
+
+      user.deposit -= amountFixed;
 
       if (userHasWon) {
         const message = `Won ${amountFixed}$ on a ${rollMode} of ${rollValue}`;
@@ -522,6 +524,5 @@ async function storeDiceBet({
     },
     { transaction }
   );
-
   return { referenceId: bet.id };
 }
