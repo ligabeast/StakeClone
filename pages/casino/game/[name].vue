@@ -74,6 +74,7 @@ const { data: bets } = await useAsyncQuery(queryGetLast7Bets);
 
 import CasinoDice from "~/components/CasinoDice.vue";
 import CasinoMines from "~/components/CasinoMines.vue";
+import CasinoRoulette from "~/components/CasinoRoulette.vue";
 
 const icons = {
   settings:
@@ -93,6 +94,8 @@ const resolveComponent = (game: string) => {
       return CasinoDice;
     case "Mines":
       return CasinoMines;
+    case "Roulette":
+      return CasinoRoulette;
     default:
       return null; // or a fallback component
   }

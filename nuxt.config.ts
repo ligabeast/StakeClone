@@ -1,13 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  ssr: false,
+  ssr: true,
   css: ["~/assets/css/main.css"],
   plugins: ["~/plugins/pinia.js"],
   runtimeConfig: {
     public: {
       baseUrl: process.env.BASE_URL,
       oddParam: process.env.ODD_PARAM_A,
+      websocketUrl: process.env.WEBSOCKET_URL,
     },
   },
   postcss: {

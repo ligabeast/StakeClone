@@ -37,6 +37,8 @@
 <script setup lang="ts">
 import Mines from "~/assets/games/Mines.jpg";
 import Dice from "~/assets/games/Dice.jpg";
+import Roulette from "~/assets/games/Roulette.jpg";
+
 const props = defineProps<{
   name?: string;
   games?: { name: string }[];
@@ -49,6 +51,8 @@ const imageSrc = (imgName: string) => {
       return Mines;
     case "Dice":
       return Dice;
+    case "Roulette":
+      return Roulette;
     default:
       return "";
   }

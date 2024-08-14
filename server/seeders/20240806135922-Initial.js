@@ -21,6 +21,10 @@ module.exports = {
         name: "Dice",
         img: "/assets/games/Dice.jpg",
       },
+      {
+        name: "Roulette",
+        img: "/assets/games/Roulette.jpg",
+      },
     ];
     await queryInterface.bulkInsert("Games", games, {});
   },

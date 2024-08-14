@@ -11,7 +11,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const authStore = useAuthStore();
     authStore.setToken(token.value);
 
-    setPageLayout("main");
     if (!authStore.isAuthenticated) {
       console.log("auth middleware, no token");
     } else {

@@ -46,7 +46,10 @@ func broadcaster() {
 	for {
 		if gamePlaying {
 			convertedString := strconv.Itoa(countdown)
-			data := map[string]string{"countdown": convertedString}
+			data := map[string]string{
+				"action": "countdown",
+				"countdown": convertedString,
+			}
 			jsonData, _ := getJson(data)
 
 			for conn := range clients {
@@ -58,7 +61,11 @@ func broadcaster() {
 			}
 		}
 		if !gamePlaying && gameDrawn {
-			data := map[string]string{"winningNumber": strconv.Itoa(last100Numbers[0])}
+			data := map[string]interface{}{
+				"action" : "drawn" , 
+				"winningNumber": strconv.Itoa(last100Numbers[0]),
+				"last100Numbers":  last100Numbers,
+			}
 			jsonData, _ := getJson(data)
 
 			for conn := range clients {
@@ -97,17 +104,16 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func prepend(slice []int, element int) []int {
-	// Create a new slice with enough capacity
-	newSlice := make([]int, len(slice)+1)
-	
-	// Set the first element to the new element
-	newSlice[0] = element
-	
-	// Copy the existing elements into the new slice
-	copy(newSlice[1:], slice)
-	
-	return newSlice
+func prependAndLimit(slice []int, element int, limit int) []int {
+	// Prepend the new element by creating a new slice
+	slice = append([]int{element}, slice...)
+
+	// Limit the slice to the specified number of elements
+	if len(slice) > limit {
+		slice = slice[:limit]
+	}
+
+	return slice
 }
 
 func rouletteGame() {
@@ -128,7 +134,7 @@ func rouletteGame() {
 		}
 		fmt.Println("Winning number:", winningNumber)
 		fmt.Println("Last 100 numbers:", last100Numbers)
-		last100Numbers = prepend(last100Numbers, winningNumber)
+		last100Numbers = prependAndLimit(last100Numbers, winningNumber, 100)
 		fmt.Println("Last 100 numbers:", last100Numbers)
 		gameDrawn = true
 		time.Sleep(5 * time.Second)
@@ -203,10 +209,6 @@ func GenerateRandomHash() (string, error) {
 	return randomString, nil
 }
 
-func getJson(data map[string]string) ([]byte, error) {
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
-	}
-	return jsonData, nil
+func getJson(data interface{}) ([]byte, error) {
+	return json.Marshal(data)
 }
