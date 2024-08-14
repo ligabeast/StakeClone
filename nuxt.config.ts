@@ -4,7 +4,12 @@ export default defineNuxtConfig({
   ssr: false,
   css: ["~/assets/css/main.css"],
   plugins: ["~/plugins/pinia.js"],
-  runtimeConfig: { public: { baseUrl: process.env.BASE_URL } },
+  runtimeConfig: {
+    public: {
+      baseUrl: process.env.BASE_URL,
+      oddParam: process.env.ODD_PARAM_A,
+    },
+  },
   postcss: {
     plugins: {
       tailwindcss: {},

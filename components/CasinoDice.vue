@@ -54,8 +54,12 @@ const lastBet = ref({
 
 const authStore = useAuthStore();
 
+const config = useRuntimeConfig();
+
 const multiplicator = computed(() => {
-  return 100.0 / sliderPrecentage.value;
+  const a = Number.parseFloat(config.public.oddParam);
+
+  return 1 / (a * winChance.value);
 });
 
 const amountConverted = computed(() => {
@@ -71,7 +75,9 @@ const rollUnder = computed(() => {
 });
 
 const winChance = computed(() => {
-  return overMode.value ? 100 - sliderPrecentage.value : sliderPrecentage.value;
+  return overMode.value
+    ? (100 - sliderPrecentage.value) / 100
+    : sliderPrecentage.value / 100;
 });
 
 function handleAmountChange(newAmount: string) {
@@ -109,7 +115,7 @@ async function handleRequestBet() {
     method: "POST",
     body: JSON.stringify({
       rollMode: overMode.value ? "Roll Over" : "Roll Under",
-      rollValue: rollUnder.value,
+      rollValue: sliderPrecentage.value,
       amount: Number.parseFloat(amount.value !== "" ? amount.value : "0.00"),
     }),
   })

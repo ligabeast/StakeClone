@@ -1,5 +1,10 @@
 import crypto from "crypto";
 
+import dotenv from "dotenv";
+
+// Load the environment variables from the root directory
+dotenv.config();
+
 function generateSeed(): string {
   const seedBuffer = crypto.randomBytes(16);
   return seedBuffer.toString("hex");
@@ -26,4 +31,16 @@ class LCG {
   }
 }
 
-export { generateSeed, LCG };
+function calculateOdd(winChance: number): number {
+  // 0.01 - 0.99
+  const a = Number.parseFloat(process.env.ODD_PARAM_A);
+
+  return 1 / (a * winChance);
+}
+
+function calculateWinningAmount(betAmount: number, winChance: number): number {
+  const odd = calculateOdd(winChance);
+  return betAmount * odd;
+}
+
+export { generateSeed, LCG, calculateWinningAmount, calculateOdd };

@@ -20,7 +20,12 @@ import Express from "express";
 import { Query, Send } from "express-serve-static-core";
 
 import bcrypt from "bcrypt";
-import { generateSeed, LCG } from "./utils";
+import {
+  generateSeed,
+  LCG,
+  calculateWinningAmount,
+  calculateOdd,
+} from "./utils";
 
 interface TypedRequestQuery<T extends Query> extends Express.Request {
   query: T;
@@ -352,8 +357,8 @@ app.post(
     const amountFixed = Number(amount.toFixed(2));
     const winChance =
       (rollMode === "Roll Over" ? 100 - rollValue : rollValue) / 100;
-    const odd = 1 / winChance;
-    const potentialWin = amountFixed * odd;
+    const odd = calculateOdd(winChance);
+    const potentialWin = calculateWinningAmount(amountFixed, winChance);
 
     const generatedSeed = generateSeed();
     const lcg = new LCG(generatedSeed);
@@ -385,6 +390,13 @@ app.post(
       });
     }
 
+    if (user.deposit < amountFixed) {
+      return res.status(401).json({
+        success: false,
+        message: "Insufficient funds",
+      });
+    }
+
     const transaction = await sequelize.transaction();
     try {
       const { referenceId } = await storeDiceBet({
@@ -397,14 +409,6 @@ app.post(
         userHasWon,
         user,
       });
-
-      if (user.deposit < amountFixed) {
-        await transaction.rollback();
-        return res.json({
-          success: false,
-          message: "Insufficient funds",
-        });
-      }
 
       user.deposit -= amountFixed;
 
@@ -442,7 +446,7 @@ app.post(
           success: false,
           message: "You lost!",
           randomNumber,
-          newBalance: user.deposit - amountFixed,
+          newBalance: user.deposit,
         });
       }
     } catch (error) {
