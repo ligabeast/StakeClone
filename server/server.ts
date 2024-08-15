@@ -403,6 +403,7 @@ app.post(
         amountFixed,
         rollValue,
         rollMode,
+        generatedSeed,
         transaction,
         odd,
         potentialWin,
@@ -467,6 +468,7 @@ async function storeDiceBet({
   rollMode,
   transaction,
   odd,
+  generatedSeed,
   potentialWin,
   userHasWon,
   user,
@@ -476,6 +478,7 @@ async function storeDiceBet({
   rollMode: string;
   odd: number;
   potentialWin: number;
+  generatedSeed: string;
   userHasWon: boolean;
   transaction: any;
   user: { deposit: number; id: number };
@@ -500,6 +503,7 @@ async function storeDiceBet({
   );
 
   const diceBet = await DiceBet.create({
+    hashSeed: generatedSeed,
     rollMode,
     rollValue,
   });

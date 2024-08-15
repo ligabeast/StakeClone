@@ -14,6 +14,7 @@ import (
 	"math/big"
 
 	"github.com/gorilla/websocket"
+	"github.com/ligabeast/StakeClone/microservices/utils/db"
 )
 
 var upgrader = websocket.Upgrader{
@@ -97,10 +98,11 @@ func setupRoutes() {
 }
 
 func main() {
-	fmt.Println("Websocket started at :8080")
+	db.InitStakeDBConnection()
 	go rouletteGame()
 	go broadcaster() // Start broadcasting in a separate goroutine
 	setupRoutes()
+	fmt.Println("Websocket starting at :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -126,17 +128,21 @@ func rouletteGame() {
 		}
 		gamePlaying = false
 		countdown = 30
-		fmt.Println("Waiting for 5 seconds before starting again...")
 		winningNumber, err := drawRouletteRound()
 		if err != nil {
 			fmt.Println("Error drawing roulette round:", err)
 			continue
 		}
 		fmt.Println("Winning number:", winningNumber)
+		
 		fmt.Println("Last 100 numbers:", last100Numbers)
 		last100Numbers = prependAndLimit(last100Numbers, winningNumber, 100)
 		fmt.Println("Last 100 numbers:", last100Numbers)
+
+		db.StoreDrawnRouletteGame(winningNumber)
+
 		gameDrawn = true
+		fmt.Println("Waiting 5 seconds before starting again...")
 		time.Sleep(5 * time.Second)
 		gameDrawn = false
 	}

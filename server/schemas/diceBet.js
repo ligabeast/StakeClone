@@ -1,4 +1,5 @@
 const { timeStamp } = require("console");
+const { hash } = require("crypto");
 const { Sequelize, DataTypes } = require("sequelize");
 
 const schema = {
@@ -7,6 +8,10 @@ const schema = {
     allowNull: false,
     primaryKey: true,
     autoIncrement: true,
+  },
+  hashSeed: {
+    type: DataTypes.STRING(64),
+    allowNull: false,
   },
   rollMode: {
     type: DataTypes.STRING(20),
