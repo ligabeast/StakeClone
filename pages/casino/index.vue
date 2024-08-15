@@ -35,6 +35,7 @@ const queryGetAllGames = gql`
 const games: Ref<{ name: string; img: string }[]> = ref([]);
 
 onMounted(async () => {
+  // TODO SSR not working with useAsyncQuery, check apollo
   try {
     const { data } = await useAsyncQuery<{
       games: { name: string; img: string }[];
