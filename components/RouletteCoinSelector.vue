@@ -25,9 +25,9 @@
                     :key="bet.color"
                 >
                     <RouletteCoin
-                        @clicked="selectedBet = bet.amount"
-                        :selectedBet="selectedBet"
-                        :deposit="deposit"
+                        @clicked="emit('betChanged', bet.amount)"
+                        :selectedBet="props.selectedBet"
+                        :deposit="openMoney"
                         :color="bet.color"
                         :amount="bet.amount"
                     />
@@ -53,14 +53,14 @@
 
 <script setup lang="ts">
 
-const props = defineProps<{
-    deposit: amount;
+const emit = defineEmits<{
+    betChanged: (amount: number) => void;
 }>();
 
-const selectedBet = ref(0);
-if (props.deposit.value > 0.5) {
-    selectedBet.value = 0.5;
-}
+const props = defineProps<{
+    openMoney: amount;
+    selectedBet: number;
+}>();
 
 const coinContainer = ref<HTMLElement | null>(null);
 

@@ -13,7 +13,8 @@
             <button
                 v-for="number in numbers"
                 :key="number.value"
-                class="h-11 rounded-md transition"
+                class="h-11 rounded-md relative transition flex flex-col items-center justify-center"
+                @click="handleNumberClick(number.value)"
                 :class="{
                     'bg-red-500 hover:bg-red-400': !isHighlighted(number) && number.color === 'red',
                     'bg-gray-500 hover:bg-gray-400': !isHighlighted(number) && number.color === 'black',
@@ -23,6 +24,14 @@
                 }"
             >
                 <span class="text-white font-bold">{{ number.value }}</span>
+                <!-- Placed Bets -->
+                <div class="absolute z-40 ">
+                    <RouletteCoin
+                        v-if="placedBets[number.value] > 0"
+                        :amount="placedBets[number.value]"
+                        color="#FDE047"
+                    />
+                </div>
             </button>
 
             <div></div>
@@ -97,6 +106,24 @@
 
 
 <script setup lang="ts">
+
+const props = defineProps<{
+    selectedBet: number;
+    openMoney: number;
+}>();
+
+const emit = defineEmits("totalBetChanged")
+
+const placedBets = ref(Array.from({ length: 37 }, () => 0));
+
+const totalBet = computed(() => {
+    return placedBets.value.reduce((acc, curr) => acc + curr, 0);
+});
+
+watch(() => totalBet.value, (newTotalBet) => {
+    emit("totalBetChanged", newTotalBet);
+});
+
 const numbers = ref([
     { value: 3, color: 'red' },
     { value: 6, color: 'black' },
@@ -144,6 +171,11 @@ function highlightRange(range) {
 
 function clearHighlight() {
     highlightedRange.value = '';
+}
+
+function handleNumberClick(number) {
+    if (props.openMoney < props.selectedBet) return;
+    placedBets.value[number] += props.selectedBet;
 }
 
 function isHighlighted(number) {

@@ -4,12 +4,12 @@
         <button
             class="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden shadow-lg"
             @click="$emit('clicked')"
-            :disabled="props.amount > props.deposit"
+            :disabled="props.amount > props?.deposit"
             :class="{
-                ' hover:shadow-2xl hover:scale-105 transition': props.amount <= props.deposit,
-                'cursor-not-allowed': props.amount > props.deposit,
-                'ring-1 ring-white': props.amount <= props.deposit && props.amount !== props.selectedBet,
-                'ring-4 ring-white': props.selectedBet === props.amount,
+                ' hover:shadow-2xl hover:scale-105 transition': props.amount <= props?.deposit,
+                'cursor-not-allowed': props.amount > props?.deposit,
+                'ring-1 ring-white': props.amount <= props?.deposit && props.amount !== props?.selectedBet,
+                'ring-4 ring-white': props?.selectedBet === props.amount,
             }"
             :style="{
                 backgroundColor: props.color,
@@ -29,7 +29,7 @@ import bg from '../assets/backgrounds/CoinBackground.svg';
 const props = defineProps<{
     amount: number,
     color: string,
-    deposit: number,
-    selectedBet: number,
+    deposit?: number,
+    selectedBet?: number,
 }>();
 </script>
