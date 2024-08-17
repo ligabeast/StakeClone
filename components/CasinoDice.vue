@@ -2,34 +2,18 @@
   <div class="flex h-full">
     <div class="w-80 p-4 flex flex-col space-y-4">
       <ModeSelector :mode="mode" @modechange="mode = $event" />
-      <BetAmountSelector
-        :amount="amount"
-        :amount-error="amountError"
-        :deposit="authStore.deposit"
-        @amountchange="handleAmountChange"
-        @doubleamount="handleDoubleAmount"
-        @halveamount="handleHalveAmount"
-      />
-      <ProfitView :multiplicator="multiplicator" :amount="amountConverted" />
+      <BetAmountSelector :amount="amount" :amount-error="amountError" :deposit="authStore.deposit"
+        @amountchange="handleAmountChange" @doubleamount="handleDoubleAmount" @halveamount="handleHalveAmount" />
+      <StaticAmount :multiplicator="multiplicator" :amount="amountConverted" title="Profit on Win" />
       <BetButton @clicked="handleRequestBet" />
     </div>
     <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
       <div></div>
       <div class="flex justify-center items-center">
-        <DiceOddSelector
-          v-model="sliderPrecentage"
-          :overMode="overMode"
-          :last-bet="lastBet"
-          :showBet="showBet"
-        />
+        <DiceOddSelector v-model="sliderPrecentage" :overMode="overMode" :last-bet="lastBet" :showBet="showBet" />
       </div>
-      <DiceOddBar
-        :multiplier="multiplicator"
-        :rollUnder="rollUnder"
-        :winChance="winChance"
-        :overMode="overMode"
-        @click="handleOddItemClick"
-      />
+      <DiceOddBar :multiplier="multiplicator" :rollUnder="rollUnder" :winChance="winChance" :overMode="overMode"
+        @click="handleOddItemClick" />
     </div>
   </div>
 </template>

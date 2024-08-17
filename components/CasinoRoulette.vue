@@ -1,17 +1,31 @@
 <template>
-  <div>
-    <p>CountDown: {{ countDown }}</p>
-    <p v-if="winningNumber">Winning Number: {{ winningNumber }}</p>
-    <p v-if="last100Numbers.length > 0">
-      Last100 Games: {{ last100Numbers.join(",") }}
-    </p>
+  <div class="flex h-full">
+    <div class="w-80 p-4 flex flex-col space-y-4">
+      <ModeSelector :mode="mode" @modechange="mode = $event" />
+      <RouletteCoinSelector />
+      <StaticAmount :amount="50" title="Total Bet" />
+      <BetButton @clicked="handleRequestBet" />
+    </div>
+    <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
+      <div></div>
+      <div class="flex justify-center items-center">rechts</div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 const countDown = ref(0);
 const winningNumber = ref(null);
+const mode = ref("manu");
 const last100Numbers = ref([]);
+
+const multiplicator = computed(() => {
+  return 1;
+});
+
+function handleRequestBet() {
+  console.log("Bet requested");
+}
 
 onMounted(() => {
   const config = useRuntimeConfig();
