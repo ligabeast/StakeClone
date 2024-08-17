@@ -4,5 +4,7 @@
     "[vue]": {
         "editor.defaultFormatter": "Vue.volar"
     },
-    "notebook.defaultFormatter": "esbenp.prettier-vscode"
+    "notebook.defaultFormatter": "esbenp.prettier-vscode",
+    "html.format.wrapAttributesIndentSize": null,
+    "html.format.wrapAttributes": "force-expand-multiline"
 }

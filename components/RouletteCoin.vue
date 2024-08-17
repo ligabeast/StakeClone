@@ -1,11 +1,25 @@
 <template>
-    <div class="w-10 h-10 rounded-full flex items-center justify-center ring-white ring-1" :style="{
-        backgroundColor: props.color,
-        backgroundImage: `url(${bg})`,
-        backgroundSize: 'cover', // Ensures the image covers the div
-        backgroundRepeat: 'no-repeat', // Prevents tiling of the background 
-    }">
-        <span class="text-sm font-bold" :style="{ color: props.textColor }">{{ props.amount }}</span>
+    <div class="relative w-9 h-9">
+        <!-- Coin Button -->
+        <button
+            class="relative w-9 h-9 rounded-full flex items-center justify-center overflow-hidden shadow-lg"
+            @click="$emit('clicked')"
+            :disabled="props.amount > props.deposit"
+            :class="{
+                ' hover:shadow-2xl hover:scale-105 transition': props.amount <= props.deposit,
+                'cursor-not-allowed': props.amount > props.deposit,
+                'ring-1 ring-white': props.amount <= props.deposit && props.amount !== props.selectedBet,
+                'ring-4 ring-white': props.selectedBet === props.amount,
+            }"
+            :style="{
+                backgroundColor: props.color,
+                backgroundImage: `url(${bg})`,
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
+            }"
+        >
+            <span class="text-sm font-bold text-black">{{ props.amount }}</span>
+        </button>
     </div>
 </template>
 
@@ -14,6 +28,8 @@ import bg from '../assets/backgrounds/CoinBackground.svg';
 
 const props = defineProps<{
     amount: number,
-    color: string
+    color: string,
+    deposit: number,
+    selectedBet: number,
 }>();
 </script>

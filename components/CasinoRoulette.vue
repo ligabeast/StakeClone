@@ -1,23 +1,41 @@
 <template>
   <div class="flex h-full">
     <div class="w-80 p-4 flex flex-col space-y-4">
-      <ModeSelector :mode="mode" @modechange="mode = $event" />
-      <RouletteCoinSelector />
-      <StaticAmount :amount="50" title="Total Bet" />
+      <ModeSelector
+        :mode="mode"
+        @modechange="mode = $event"
+      />
+      <RouletteCoinSelector :deposit="deposit" />
+      <StaticAmount
+        :amount="50"
+        title="Total Bet"
+      />
       <BetButton @clicked="handleRequestBet" />
     </div>
     <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
-      <div></div>
-      <div class="flex justify-center items-center">rechts</div>
+      <div class="flex flex-col justify-between items-center h-full">
+        <RouletteWheel />
+        <RouletteBettingTable />
+
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from "../stores/auth";
+
 const countDown = ref(0);
 const winningNumber = ref(null);
 const mode = ref("manu");
 const last100Numbers = ref([]);
+
+const authStore = useAuthStore();
+const deposit = ref(authStore.deposit);
+
+watch(() => authStore.deposit, (newDeposit) => {
+  deposit.value = newDeposit;
+});
 
 const multiplicator = computed(() => {
   return 1;
