@@ -532,11 +532,12 @@ app.post(
 
         // Find current running Roulette Game
         const room = 1;
-        const currentGameId = await RouletteGame.findOne({
+        const currentGame = await RouletteGame.findOne({
             where: {
                 status: 'running',
                 room: room,
             },
+            order: [['createdAt', 'DESC']],
             attributes: ['id'],
         });
 
@@ -564,6 +565,7 @@ app.post(
             const rouletteBet = await RouletteBets.create({
                 numberBets: JSON.stringify(placedNumberBets),
                 additionalBets: JSON.stringify(placedAdditionalBets),
+                rouletteGameId: currentGame.id,
             });
 
             // Insert Bet

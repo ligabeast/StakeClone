@@ -14,11 +14,20 @@
         :amount="totalBet"
         title="Total Bet"
       />
-      <BetButton @clicked="handleRequestBet" />
+      <BetButton
+        @clicked="handleRequestBet"
+        :betPlaced="betPlaced"
+        :betsClosed="betsClosed"
+      />
     </div>
     <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
       <div class="flex flex-col justify-between items-center h-full">
-        <RouletteWheel />
+        <RouletteWheel
+          :countDown="countDown"
+          :showWinningNumber="showWinningNumber"
+          :winningNumber="winningNumber"
+          :last5Numbers="last5Numbers"
+        />
         <div class="flex flex-row justify-between w-full items-center h-10">
           <button
             class="flex space-x-2 justify-center items-center h-full w-40 ring-gray-300 hover:ring-1 transition rounded-xl"
@@ -78,9 +87,9 @@ import { useAuthStore } from "../stores/auth";
 import { useMyFetch } from "~/composable/useMyFetch";
 
 const countDown = ref(0);
-const winningNumber = ref(null);
+const winningNumber = ref(0);
 const mode = ref("manu");
-const last100Numbers = ref([]);
+const last5Numbers = ref([]);
 
 const history = ref([]);
 
@@ -90,10 +99,17 @@ const placedAdditionalBets = ref(Array.from({ length: 9 }, () => 0));
 const authStore = useAuthStore();
 const deposit = ref(authStore.deposit);
 
+const betPlaced = ref(false);
+const showWinningNumber = ref(false);
+
 const selectedBet = ref(0);
 if (deposit.value > 0.5) {
   selectedBet.value = 0.5;
 }
+
+const betsClosed = computed(() => {
+  return (countDown.value <= 5);
+})
 
 const totalBet = computed(() => {
   return placedNumberBets.value.reduce((acc, curr) => acc + curr, 0) + placedAdditionalBets.value.reduce((acc, curr) => acc + curr, 0);
@@ -107,7 +123,9 @@ watch(() => authStore.deposit, (newDeposit) => {
   deposit.value = newDeposit;
 });
 
+
 async function handleRequestBet() {
+  betPlaced.value = true;
   const data = await useMyFetch("/play/roulette", {
     method: "POST",
     body: JSON.stringify({
@@ -118,13 +136,12 @@ async function handleRequestBet() {
     console.error(err);
   })
   if (!data) return;
+  authStore.setDeposit(data.newBalance);
 }
 
 function handleBetChange(amount: number) {
   selectedBet.value = amount;
 }
-
-
 
 function handleUndo() {
   const lastBet = history.value.pop();
@@ -163,11 +180,17 @@ onMounted(() => {
   ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
     if (data && data.action && data.action === "countdown") {
-      countDown.value = data.countdown;
+      showWinningNumber.value = false;
+      countDown.value = Number(data.countdown);
+      last5Numbers.value = data.last5Numbers;
     }
     if (data && data.action && data.action === "drawn") {
-      winningNumber.value = data.winningNumber;
-      last100Numbers.value = data.last100Numbers;
+      winningNumber.value = Number(data.winningNumber);
+      showWinningNumber.value = true;
+      last5Numbers.value = data.last5Numbers;
+      if (betPlaced.value) {
+        betPlaced.value = false;
+      }
     }
   };
 

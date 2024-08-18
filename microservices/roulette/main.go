@@ -27,7 +27,7 @@ var countdown int = 30
 var gamePlaying bool = false
 var gameDrawn bool = false
 var clients = make(map[*websocket.Conn]bool) // Store active connections
-var last100Numbers []int
+var last5Numbers []int
 
 func reader(conn *websocket.Conn) {
 	defer func() {
@@ -47,9 +47,10 @@ func broadcaster() {
 	for {
 		if gamePlaying {
 			convertedString := strconv.Itoa(countdown)
-			data := map[string]string{
+			data := map[string]interface{}{
 				"action": "countdown",
 				"countdown": convertedString,
+				"last5Numbers":  last5Numbers,
 			}
 			jsonData, _ := getJson(data)
 
@@ -64,8 +65,8 @@ func broadcaster() {
 		if !gamePlaying && gameDrawn {
 			data := map[string]interface{}{
 				"action" : "drawn" , 
-				"winningNumber": strconv.Itoa(last100Numbers[0]),
-				"last100Numbers":  last100Numbers,
+				"winningNumber": strconv.Itoa(last5Numbers[0]),
+				"last5Numbers":  last5Numbers,
 			}
 			jsonData, _ := getJson(data)
 
@@ -136,9 +137,9 @@ func rouletteGame() {
 		}
 		fmt.Println("Winning number:", winningNumber)
 		
-		fmt.Println("Last 100 numbers:", last100Numbers)
-		last100Numbers = prependAndLimit(last100Numbers, winningNumber, 100)
-		fmt.Println("Last 100 numbers:", last100Numbers)
+		fmt.Println("Last 5 numbers:", last5Numbers)
+		last5Numbers = prependAndLimit(last5Numbers, winningNumber, 5)
+		fmt.Println("Last 5 numbers:", last5Numbers)
 
 		db.StoreDrawnRouletteGame(winningNumber,insertedId)
 

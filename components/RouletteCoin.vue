@@ -18,7 +18,7 @@
                 backgroundRepeat: 'no-repeat',
             }"
         >
-            <span class="text-sm font-bold text-black">{{ props.amount }}</span>
+            <span class="text-xs font-bold text-black">{{ props.amount }}</span>
         </button>
     </div>
 </template>

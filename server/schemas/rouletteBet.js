@@ -15,6 +15,10 @@ const schema = {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    rouletteGameId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
 };
 
 module.exports = {
