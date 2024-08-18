@@ -47,7 +47,27 @@ func getStakeDBdsn() string {
 	return dsn
 }
 
-func StoreDrawnRouletteGame(winningNumber int) {
+func StoreInitialRouletteGame() int {
+	if stakeDb == nil {
+		log.Fatal("Stake DB not initialized")
+		return 0;
+	}
+
+	results, err := stakeDb.Exec("INSERT INTO Stake.RouletteGames (status,room) values ('running',1);");
+	if err != nil {
+		log.Fatal(err)
+		return 0;
+	}
+	fmt.Println("Stored initial roulette game")
+	id,err := results.LastInsertId()
+	if err != nil {
+		log.Fatal("No id returned");
+		return 0;
+	}
+	return int(id);
+}
+
+func StoreDrawnRouletteGame(winningNumber int, id int) {
 	if stakeDb == nil {
 		log.Fatal("Stake DB not initialized")
 		return;
@@ -80,7 +100,7 @@ func StoreDrawnRouletteGame(winningNumber int) {
 		winningSection = "25-36"
 	}
 
-	_, err := stakeDb.Exec("INSERT INTO Stake.RoulleteGames (winningNumber, winningColor, winningSection, isOdd) values (?,?,?,?);", winningNumber, winningColor, winningSection, isOdd)
+	_, err := stakeDb.Exec("Update Stake.RouletteGames SET winningNumber=?,winningColor=?,winningSection=?,isOdd=?,status='completed' where id = ?", winningNumber, winningColor, winningSection, isOdd, id)
 	if err != nil {
 		log.Fatal(err)
 	}

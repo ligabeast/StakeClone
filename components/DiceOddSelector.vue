@@ -13,13 +13,12 @@
             v-if="showBet"
           >
             <span
-              class="text-sm font-medium z-10"
+              class="text-sm font-medium z-10 select-none"
               :class="{
                 'text-red-500': !props.lastBet.win,
                 'text-green-500': props.lastBet.win,
               }"
-              >{{ (lastBet.value * 100).toFixed(2) }}%</span
-            >
+            >{{ (lastBet.value * 100).toFixed(2) }}%</span>
             <svg
               class="h-20 absolute"
               xmlns="http://www.w3.org/2000/svg"
@@ -166,15 +165,19 @@ onMounted(() => {
   position: absolute;
   translate: var(--x) 0;
 }
+
 .cls-1 {
   fill: #fff;
 }
+
 .cls-2 {
   fill: #e9f0f5;
 }
+
 .cls-3 {
   fill: #d3dee6;
 }
+
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.5s ease;

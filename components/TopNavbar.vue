@@ -1,25 +1,23 @@
 <template>
   <div
-    class="flex justify-between px-52 bg-[#1a2c38]"
+    class="flex justify-between pl-52 pr-28 bg-[#1a2c38]"
     id="box"
     :class="fullWidthMinusSidebar"
   >
     <NuxtLink to="/casino">
       <StakeIcon />
     </NuxtLink>
-    <div v-if="authStore.isAuthenticated" class="flex items-center">
-      <div
-        class="w-28 bg-gray-700 h-10 rounded-l-md hover:cursor-pointer hover:bg-gray-800 transition"
-      >
-        <div
-          class="flex space-x-1 justify-between px-5 items-center text-white h-full"
-        >
+    <div
+      v-if="authStore.isAuthenticated"
+      class="flex items-center"
+    >
+      <div class="w-28 bg-gray-700 h-10 rounded-l-md hover:cursor-pointer hover:bg-gray-800 transition">
+        <div class="flex space-x-1 justify-between px-5 items-center text-white h-full">
           <span></span>
           <div class="text-sm text-gray-300 flex space-x-2">
             <span class="font-medium text-white select-none">{{
               deposit.toFixed(2)
-            }}</span
-            ><span class="select-none">$</span>
+              }}</span><span class="select-none">$</span>
           </div>
           <svg
             fill="currentColor"
@@ -28,9 +26,8 @@
             style="transform: rotate(0deg)"
           >
             <title></title>
-            <path
-              d="M32.271 49.763 9.201 26.692l6.928-6.93 16.145 16.145 16.144-16.144 6.93 6.929-23.072 23.07h-.005Z"
-            ></path>
+            <path d="M32.271 49.763 9.201 26.692l6.928-6.93 16.145 16.145 16.144-16.144 6.93 6.929-23.072 23.07h-.005Z">
+            </path>
           </svg>
         </div>
       </div>
@@ -57,10 +54,13 @@
       </template>
       <template v-else>
         <div class="flex space-x-5 items-center">
-          <button
-            class="flex space-x-2 text-gray-200 hover:text-white transition"
-          >
-            <svg fill="currentColor" viewBox="0 0 64 64" class="w-3" style="">
+          <button class="flex space-x-2 text-gray-200 hover:text-white transition">
+            <svg
+              fill="currentColor"
+              viewBox="0 0 64 64"
+              class="w-3"
+              style=""
+            >
               <title></title>
               <path
                 fill-rule="evenodd"
@@ -113,7 +113,10 @@
               ></path>
             </svg>
           </button>
-          <button class="text-white" @click="handleLogoutRequest">
+          <button
+            class="text-white"
+            @click="handleLogoutRequest"
+          >
             Logout
           </button>
         </div>

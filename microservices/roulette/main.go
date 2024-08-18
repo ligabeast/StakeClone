@@ -122,6 +122,7 @@ func rouletteGame() {
 	for {
 		fmt.Println("Starting countdown...")
 		gamePlaying = true
+		insertedId := db.StoreInitialRouletteGame()
 		for countdown = 30; countdown >= 0; countdown-- {
 			fmt.Println(countdown)
 			time.Sleep(1 * time.Second)
@@ -139,7 +140,7 @@ func rouletteGame() {
 		last100Numbers = prependAndLimit(last100Numbers, winningNumber, 100)
 		fmt.Println("Last 100 numbers:", last100Numbers)
 
-		db.StoreDrawnRouletteGame(winningNumber)
+		db.StoreDrawnRouletteGame(winningNumber,insertedId)
 
 		gameDrawn = true
 		fmt.Println("Waiting 5 seconds before starting again...")
