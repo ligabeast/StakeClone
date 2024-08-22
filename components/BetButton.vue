@@ -11,8 +11,8 @@
 <script lang="ts" setup>
 const emit = defineEmits(["clicked"]);
 const props = defineProps<{
-  betPlaced: boolean,
-  betsClosed: boolean
+  betPlaced?: boolean,
+  betsClosed?: boolean
 }>();
 
 const title = computed(() => {

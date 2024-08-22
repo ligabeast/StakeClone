@@ -1,8 +1,8 @@
 <template>
   <div
-    class="flex justify-between pl-52 pr-28 bg-[#1a2c38]"
+    class="flex justify-between pl-52 pr-64 bg-[#1a2c38]"
     id="box"
-    :class="fullWidthMinusSidebar"
+    :class="props.fullWidthMinusSidebar"
   >
     <NuxtLink to="/casino">
       <StakeIcon />
@@ -17,7 +17,7 @@
           <div class="text-sm text-gray-300 flex space-x-2">
             <span class="font-medium text-white select-none">{{
               deposit.toFixed(2)
-              }}</span><span class="select-none">$</span>
+            }}</span><span class="select-none">$</span>
           </div>
           <svg
             fill="currentColor"
@@ -41,13 +41,14 @@
       <template v-if="!authStore.isAuthenticated">
         <button
           class="rounded-sm font-medium whitespace-nowrap ring-offset-background transition disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] bg-transparent text-white hover:bg-transparent hover:text-white focus-visible:outline-none text-sm leading-none py-[0.9375rem] px-[1.25rem]"
-          @click="handleLoginRequest"
+          @click="emit('loginRequest')"
         >
-          Sign in
+          Sign
+          in
         </button>
         <button
           class="rounded-sm font-medium whitespace-nowrap ring-offset-background transition disabled:pointer-events-none disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:scale-[0.98] bg-blue-500 text-white hover:bg-blue-600 hover: focus-visible:outline-white text-sm leading-none shadow-md py-[0.9375rem] px-[1.25rem]"
-          @click="handleRegisterRequest"
+          @click="emit('registerRequest')"
         >
           Register
         </button>
@@ -130,13 +131,14 @@ import { useMyFetch } from "~/composable/useMyFetch";
 import { useAuthStore } from "~/stores/auth";
 
 const authStore = useAuthStore();
-const cookie = useCookie("token");
-
 const deposit = computed(() => authStore.deposit);
 
 const props = defineProps<{
   fullWidthMinusSidebar: Object;
 }>();
+
+const emit = defineEmits(['loginRequest', 'registerRequest', 'logoutRequest']);
+
 
 function handleLogoutRequest() {
   // delete cookie
@@ -145,52 +147,8 @@ function handleLogoutRequest() {
 
   // delete store
   authStore.reset();
-}
 
-function handleLoginRequest() {
-  useMyFetch("/login", {
-    method: "POST",
-    body: JSON.stringify({
-      username: "test",
-      password: "123",
-    }),
-  })
-    .then((data) => {
-      authStore.setDeposit(data.deposit);
-      authStore.setUsername(data.username);
-      authStore.setToken(data.token);
-
-      const token = useCookie("token");
-      token.value = data.token;
-
-      console.log("login success: ", data);
-    })
-    .catch((error) => {
-      console.log("login failed: ", error);
-    });
-}
-
-function handleRegisterRequest() {
-  useMyFetch("/register", {
-    method: "POST",
-    body: JSON.stringify({
-      username: "test",
-      password: "123",
-    }),
-  })
-    .then((data) => {
-      authStore.setDeposit(data.deposit);
-      authStore.setUsername(data.username);
-      authStore.setToken(data.token);
-
-      const token = useCookie("token");
-      token.value = data.token;
-
-      console.log("register success: ", data);
-    })
-    .catch((error) => {
-      console.log("register failed ", error);
-    });
+  emit('logoutRequest');
 }
 </script>
 <style>

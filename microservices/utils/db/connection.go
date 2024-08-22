@@ -68,10 +68,11 @@ func StoreInitialRouletteGame() int {
 	return int(id);
 }
 
-func StoreDrawnRouletteGame(winningNumber int, id int) {
+func StoreDrawnRouletteGame(winningNumber int, id int) map[int]float64 {
+	// return map of user id and newBalance
 	if stakeDb == nil {
 		log.Fatal("Stake DB not initialized")
-		return;
+		return nil;
 	}
 	isOdd := winningNumber % 2 != 0
 	winningColor := "red"
@@ -107,60 +108,72 @@ func StoreDrawnRouletteGame(winningNumber int, id int) {
 	}
 	fmt.Println("Stored drawn roulette game", id)
 
-	rows, err := stakeDb.Query("SELECT b.userId as userid, rbs.numberBets as numberBets, rbs.additionalBets as additionalBets from Stake.RouletteGames roga JOIN Stake.RouletteBets rbs ON rbs.rouletteGameId = roga.id JOIN Stake.Bets b On b.referenceId = rbs.id where roga.id = ?", id)
+	rows, err := stakeDb.Query("SELECT b.userId as userid, u.deposit as deposit, rbs.numberBets as numberBets, rbs.additionalBets as additionalBets from Stake.RouletteGames roga JOIN Stake.RouletteBets rbs ON rbs.rouletteGameId = roga.id JOIN Stake.Bets b On b.referenceId = rbs.id JOIN Stake.Users u ON u.id = b.userId where roga.id = ?", id)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 
+	newBalance := make(map[int]float64)
+
+	fmt.Println("Calculating profit for users")
+
 	for rows.Next() {
 		var userId int
+		var deposit float64
 		var numberBets string
 		var additionalBets string
 
-		err := rows.Scan(&userId, &numberBets, &additionalBets)
+		fmt.Println("Calculating profit for user", userId)
+
+		err = rows.Scan(&userId, &deposit, &numberBets, &additionalBets)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var numberBetsSlice []int
-		var additionalBetsSLice []int
+		var numberBetsSlice []float64
+		var additionalBetsSlice []float64
 
 		fmt.Println(numberBets)
 		err = json.Unmarshal([]byte(numberBets), &numberBetsSlice)
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = json.Unmarshal([]byte(additionalBets), &additionalBetsSLice)
+		err = json.Unmarshal([]byte(additionalBets), &additionalBetsSlice)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		profit := calculateProfit(winningNumber, numberBetsSlice, additionalBetsSLice);
+		profit := calculateProfit(winningNumber, numberBetsSlice, additionalBetsSlice);
 
 		if(profit == 0){
 			fmt.Println("User with id: ", userId ," Lost")
-			return;
-		}
-		fmt.Println("User with id: ", userId ," Won: ", profit)
-		_, err = stakeDb.Exec("Update Stake.Users set deposit = deposit + ? where id = ?", profit, userId)
-		if err != nil {
-			log.Fatal(err)
+		} else {
+			fmt.Println("User with id: ", userId ," Won: ", profit)
+			_, err = stakeDb.Exec("Update Stake.Users set deposit = deposit + ? where id = ?", profit, userId)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
+		newBalance[userId] = deposit + profit
 	}
+	return newBalance
 }
 
-func calculateProfit(winningNumber int, numberBets []int, additionalBets []int) int {
-    var profit int
+func calculateProfit(winningNumber int, numberBets []float64, additionalBets []float64) float64 {
+    var profit float64
+	redNumbers := map[int]bool{1: true, 3: true, 5: true, 7: true, 9: true, 12: true, 14: true, 16: true, 18: true, 19: true, 21: true, 23: true, 25: true, 27: true, 30: true, 32: true, 34: true, 36: true}
+	blackNumbers := map[int]bool{2: true, 4: true, 6: true, 8: true, 10: true, 11: true, 13: true, 15: true, 17: true, 20: true, 22: true, 24: true, 26: true, 28: true, 29: true, 31: true, 33: true, 35: true}
+	
 
     // Payout ratio for straight-up bets
     const straightUpPayout = 36
 
     // Process number bets (straight-up bets)
     for i, v := range numberBets {
-        if v > 0 && winningNumber == v {
+        if v > 0 && winningNumber == i {
             profit += straightUpPayout * numberBets[i]
         }
     }
@@ -170,39 +183,39 @@ func calculateProfit(winningNumber int, numberBets []int, additionalBets []int) 
             switch i {
             case 0: // 1-12
                 if winningNumber >= 1 && winningNumber <= 12 {
-                    profit += 3 * additionalBets[i]
+                    profit += 3.0 * additionalBets[i]
                 }
             case 1: // 13-24
                 if winningNumber >= 13 && winningNumber <= 24 {
-                    profit += 3 * additionalBets[i]
+                    profit += 3.0 * additionalBets[i]
                 }
             case 2: // 25-36
                 if winningNumber >= 25 && winningNumber <= 36 {
-                    profit += 3 * additionalBets[i]
+                    profit += 3.0 * additionalBets[i]
                 }
             case 3: // 1-18 
                 if winningNumber >= 1 && winningNumber <= 18 {
-                    profit += 2 * additionalBets[i]
+                    profit += 2.0 * additionalBets[i]
                 }
             case 4: // Even
                 if winningNumber%2 == 0 && winningNumber != 0 {
-                    profit += 2 * additionalBets[i]
+                    profit += 2.0 * additionalBets[i]
                 }
-            case 5: // Red
-                if winningNumber >= 1 && winningNumber <= 10 {
-                    profit += 2 * additionalBets[i]
-                }
-            case 6: // Black
-                if winningNumber >= 11 && winningNumber <= 20 {
-                    profit += 2 * additionalBets[i]
+			case 5: // Red
+				if redNumbers[winningNumber] {
+					profit += 2.0 * additionalBets[i]
+				}
+			case 6: // Black
+				if blackNumbers[winningNumber] {
+					profit += 2.0 * additionalBets[i]
 				}
             case 7: // Odd
                 if winningNumber%2 != 0 {
-                    profit += 2 * additionalBets[i]
+                    profit += 2.0 * additionalBets[i]
                 }
             case 8: // 19-36
                 if winningNumber >= 19 && winningNumber <= 36 {
-                    profit += 2 * additionalBets[i]
+                    profit += 2.0 * additionalBets[i]
                 }
             }
         }

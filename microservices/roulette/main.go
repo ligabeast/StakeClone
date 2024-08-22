@@ -8,13 +8,11 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	"strconv"
-
 	"math/big"
-
 	"github.com/gorilla/websocket"
 	"github.com/ligabeast/StakeClone/microservices/utils/db"
+	"github.com/ligabeast/StakeClone/microservices/utils/server"
 )
 
 var upgrader = websocket.Upgrader{
@@ -26,7 +24,8 @@ var upgrader = websocket.Upgrader{
 var countdown int = 30
 var gamePlaying bool = false
 var gameDrawn bool = false
-var clients = make(map[*websocket.Conn]bool) // Store active connections
+var clients = make(map[*websocket.Conn]int) // Store active connections
+var newBalance = make(map[int]float64)
 var last5Numbers []int
 
 func reader(conn *websocket.Conn) {
@@ -35,10 +34,28 @@ func reader(conn *websocket.Conn) {
 		delete(clients, conn) // Remove client on disconnect
 	}()
 	for {
-		_, _, err := conn.ReadMessage()
+		messageType, message, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Client disconnected:", err)
 			return
+		}
+
+		if messageType == websocket.TextMessage {
+			data := map[string]interface{}{}
+			err := json.Unmarshal(message, &data)
+			if err != nil {
+				log.Println("Error parsing JSON:", err)
+				return
+			}
+
+			if data["action"] == "authenticate" {
+				jwtToken := data["token"].(string)
+				userid := server.ExtractUserIdFromJWT(jwtToken)
+				clients[conn] = userid
+				log.Println("Client authenticated with user ID:", userid)
+			} else {
+				log.Println("Unknown message", data)
+			}
 		}
 	}
 }
@@ -62,22 +79,31 @@ func broadcaster() {
 				}
 			}
 		}
+
 		if !gamePlaying && gameDrawn {
-			data := map[string]interface{}{
-				"action" : "drawn" , 
-				"winningNumber": strconv.Itoa(last5Numbers[0]),
-				"last5Numbers":  last5Numbers,
-			}
-			jsonData, _ := getJson(data)
+			fmt.Println("Broadcasting drawn result...")
 
 			for conn := range clients {
+				data := map[string]interface{}{
+					"action":        "drawn",
+					"winningNumber": strconv.Itoa(last5Numbers[0]),
+					"last5Numbers":  last5Numbers,
+				}
+
+				if balance, ok := newBalance[clients[conn]]; ok {
+					data["newBalance"] = balance
+				} else {
+					log.Printf("User ID %d not found in newBalance map", clients[conn])
+				}
+
+				jsonData, _ := getJson(data)
+
 				if err := conn.WriteMessage(websocket.TextMessage, jsonData); err != nil {
 					log.Println("Error writing to client:", err)
 					conn.Close()
 					delete(clients, conn)
 				}
 			}
-			gameDrawn = false
 		}
 		time.Sleep(1 * time.Second) // Send every second
 	}
@@ -89,7 +115,7 @@ func wsRoulette(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	clients[ws] = true // Add new connection to clients map
+	clients[ws] = -1 // Not authenticated
 	log.Println("Client Connected")
 	go reader(ws)
 }
@@ -137,11 +163,19 @@ func rouletteGame() {
 		}
 		fmt.Println("Winning number:", winningNumber)
 		
-		fmt.Println("Last 5 numbers:", last5Numbers)
 		last5Numbers = prependAndLimit(last5Numbers, winningNumber, 5)
 		fmt.Println("Last 5 numbers:", last5Numbers)
 
-		db.StoreDrawnRouletteGame(winningNumber,insertedId)
+		updatedBalances := db.StoreDrawnRouletteGame(winningNumber,insertedId)
+
+
+
+		for key, value := range updatedBalances {
+			fmt.Println("User ID:", key, "New balance:", value)
+			newBalance[key] = value
+		}
+
+		fmt.Println("Game drawn! , new balances:", newBalance)
 
 		gameDrawn = true
 		fmt.Println("Waiting 5 seconds before starting again...")
@@ -197,7 +231,6 @@ func drawRouletteRound () (int, error) {
 
 	// Calculate the winning number
 	winningNumber := int((randomNumber) * 36)
-	fmt.Println("Winning number:", winningNumber)
 
 	return winningNumber, nil
 }

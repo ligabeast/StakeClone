@@ -196,9 +196,7 @@ const props = defineProps<{
     placedAdditionalBets: number[];
 }>();
 
-const emit = defineEmits<{
-    newBet: ({ amount: number, index: number, type: string, }) => void;
-}>();
+const emit = defineEmits(['newBet']);
 
 
 const numbers = ref([
@@ -242,7 +240,7 @@ const numbers = ref([
 
 const highlightedRange = ref('');
 
-function highlightRange(range) {
+function highlightRange(range: string) {
     highlightedRange.value = range;
 }
 
@@ -250,17 +248,17 @@ function clearHighlight() {
     highlightedRange.value = '';
 }
 
-function handleNumberClick(number) {
+function handleNumberClick(index: number) {
     if (props.openMoney < props.selectedBet) return;
-    emit('newBet', { amount: props.selectedBet, index: number, type: 'number' });
+    emit('newBet', { amount: props.selectedBet, index, type: 'number' });
 }
 
-function handleAdditionalClick(index) {
+function handleAdditionalClick(index: number) {
     if (props.openMoney < props.selectedBet) return;
     emit('newBet', { amount: props.selectedBet, index, type: 'additional' });
 }
 
-function isHighlighted(number) {
+function isHighlighted(number: { value: number; color: string }) {
     if (highlightedRange.value === '') return false;
 
     if (highlightedRange.value === '1-12') {

@@ -53,12 +53,12 @@
 
 <script setup lang="ts">
 
-const emit = defineEmits<{
-    betChanged: (amount: number) => void;
-}>();
+const emit = defineEmits({
+    betChanged: (value: number) => true,
+});
 
 const props = defineProps<{
-    openMoney: amount;
+    openMoney: number;
     selectedBet: number;
 }>();
 
@@ -66,11 +66,13 @@ const coinContainer = ref<HTMLElement | null>(null);
 
 function handleLeft() {
     // 40px == 2.5rem == One Coins width
+    if (!coinContainer.value) return;
     coinContainer.value.scrollLeft -= 80;
 }
 
 function handleRight() {
     // 40px == 2.5rem == One Coins width
+    if (!coinContainer.value) return;
     coinContainer.value.scrollLeft += 80;
 }
 

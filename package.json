@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@nuxtjs/google-fonts": "^3.2.0",
+    "jwt-decode": "^3.1.2",
+    "notivue": "^2.4.4",
     "nuxt": "^3.12.2",
     "pinia": "^2.2.1",
     "vue": "^3.4.29",

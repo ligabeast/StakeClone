@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full flex justify-between items-center relative space-x-4">
+    <div class="w-full flex justify-between items-center relative">
         <div class="w-60 h-60 flex items-center justify-center">
             <div class="rounded-xl w-16 h-16 bg-gray-500 flex items-center justify-center relative">
                 <Transition
@@ -24,7 +24,7 @@
                 </Transition>
             </div>
         </div>
-        <div class="relative h-60 mt-10 w-fit">
+        <div class="relative h-60 mt-10">
             <div
                 class="w-60 h-60 z-30 rounded-full shadow-inner"
                 :style="{
@@ -40,7 +40,7 @@
                 <div class="absolute scale-[103%] inset-0 rounded-full border-8 border-gray-900"></div>
             </div>
         </div>
-        <div class="flex-grow flex flex-col justify-center items-center space-y-2">
+        <div class="flex flex-col justify-center items-center space-y-2 px-10">
             <template v-for="item in last5Colorful">
                 <div
                     class="rounded-full w-10 h-10 flex items-center justify-center"
@@ -69,6 +69,9 @@ const props = defineProps<{
 }>();
 
 const last5Colorful = computed(() => {
+    if (props.last5Numbers.length === 0) {
+        return [];
+    }
     return props.last5Numbers.map(num => {
         return { color: getColor(num), val: num };
     });
@@ -96,7 +99,7 @@ const computedColor = computed(() => {
 
     // Check if the winningNumber is in one of the arrays
     if (blackNumbers.includes(props.winningNumber)) {
-        return 'bg-black';
+        return 'bg-gray-900';
     } else if (redNumbers.includes(props.winningNumber)) {
         return 'bg-red-500';
     } else if (props.winningNumber === 0) {

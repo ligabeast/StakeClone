@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-full">
-    <div class="w-80 p-4 flex flex-col space-y-4">
+    <div class="w-80 p-4 flex flex-col space-y-4 rounded-tl-lg">
       <ModeSelector
         :mode="mode"
         @modechange="mode = $event"
@@ -20,7 +20,7 @@
         :betsClosed="betsClosed"
       />
     </div>
-    <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
+    <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between rounded-tr-lg">
       <div class="flex flex-col justify-between items-center h-full">
         <RouletteWheel
           :countDown="countDown"
@@ -91,7 +91,7 @@ const winningNumber = ref(0);
 const mode = ref("manu");
 const last5Numbers = ref([]);
 
-const history = ref([]);
+const history = ref<{ amount: number, type: string, index: number }[]>([]);
 
 const placedNumberBets = ref(Array.from({ length: 37 }, () => 0));
 const placedAdditionalBets = ref(Array.from({ length: 9 }, () => 0));
@@ -155,7 +155,7 @@ function handleUndo() {
   }
 }
 
-function handleNewBet({ amount, type, index }) {
+function handleNewBet({ amount, type, index }: { amount: number, type: string, index: number }) {
   if (type === "number") {
     placedNumberBets.value[index] += amount;
   } else {
@@ -167,39 +167,41 @@ function handleNewBet({ amount, type, index }) {
 function handleClean() {
   placedNumberBets.value = Array.from({ length: 37 }, () => 0);
   placedAdditionalBets.value = Array.from({ length: 9 }, () => 0);
+  history.value = [];
 }
 
-onMounted(() => {
-  const config = useRuntimeConfig();
-  const ws = new WebSocket(`${config.public.websocketUrl}/roulette`);
+const config = useRuntimeConfig();
+const ws = new WebSocket(`${config.public.websocketUrl}/roulette`);
 
-  ws.onopen = () => {
-    console.log("Connected to WebSocket server");
-  };
+ws.onopen = () => {
+  console.log("Connected to WebSocket server");
+  ws.send(JSON.stringify({ action: "authenticate", token: authStore.token }));
+};
 
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data && data.action && data.action === "countdown") {
-      showWinningNumber.value = false;
-      countDown.value = Number(data.countdown);
-      last5Numbers.value = data.last5Numbers;
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data && data.action && data.action === "countdown") {
+    showWinningNumber.value = false;
+    countDown.value = Number(data.countdown);
+    last5Numbers.value = data.last5Numbers;
+  }
+  if (data && data.action && data.action === "drawn") {
+    winningNumber.value = Number(data.winningNumber);
+    showWinningNumber.value = true;
+    last5Numbers.value = data.last5Numbers;
+    if (betPlaced.value) {
+      betPlaced.value = false;
+      authStore.setDeposit(Number.parseFloat(data.newBalance));
     }
-    if (data && data.action && data.action === "drawn") {
-      winningNumber.value = Number(data.winningNumber);
-      showWinningNumber.value = true;
-      last5Numbers.value = data.last5Numbers;
-      if (betPlaced.value) {
-        betPlaced.value = false;
-      }
-    }
-  };
+  }
+};
 
-  ws.onerror = (error) => {
-    console.error("WebSocket error:", error);
-  };
+ws.onerror = (error) => {
+  console.error("WebSocket error:", error);
+};
 
-  ws.onclose = () => {
-    console.log("WebSocket connection closed");
-  };
-});
+ws.onclose = () => {
+  console.log("WebSocket connection closed");
+};
+
 </script>

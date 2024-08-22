@@ -1,5 +1,3 @@
 {
-    // https://nuxt.com/docs/guide/concepts/typescript
-    "extends": "./.nuxt/tsconfig.json",
-    "include": ["./declarations.d.ts"]
+    "extends": "./.nuxt/tsconfig.json"
 }

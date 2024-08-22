@@ -1,26 +1,49 @@
 <template>
   <div class="flex h-full">
-    <div class="w-80 p-4 flex flex-col space-y-4">
-      <ModeSelector :mode="mode" @modechange="mode = $event" />
-      <BetAmountSelector :amount="amount" :amount-error="amountError" :deposit="authStore.deposit"
-        @amountchange="handleAmountChange" @doubleamount="handleDoubleAmount" @halveamount="handleHalveAmount" />
-      <StaticAmount :multiplicator="multiplicator" :amount="amountConverted" title="Profit on Win" />
+    <div class="w-80 p-4 flex flex-col space-y-4 rounded-tl-lg">
+      <ModeSelector
+        :mode="mode"
+        @modechange="mode = $event"
+      />
+      <BetAmountSelector
+        :amount="amount"
+        :amount-error="amountError"
+        :deposit="authStore.deposit"
+        @amountchange="handleAmountChange"
+        @doubleamount="handleDoubleAmount"
+        @halveamount="handleHalveAmount"
+      />
+      <StaticAmount
+        :multiplicator="multiplicator"
+        :amount="amountConverted"
+        title="Profit on Win"
+      />
       <BetButton @clicked="handleRequestBet" />
     </div>
-    <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between">
+    <div class="p-4 bg-gray-700 w-full h-full flex flex-col justify-between rounded-tr-lg">
       <div></div>
       <div class="flex justify-center items-center">
-        <DiceOddSelector v-model="sliderPrecentage" :overMode="overMode" :last-bet="lastBet" :showBet="showBet" />
+        <DiceOddSelector
+          v-model="sliderPrecentage"
+          :overMode="overMode"
+          :last-bet="lastBet"
+          :showBet="showBet"
+        />
       </div>
-      <DiceOddBar :multiplier="multiplicator" :rollUnder="rollUnder" :winChance="winChance" :overMode="overMode"
-        @click="handleOddItemClick" />
+      <DiceOddBar
+        :multiplier="multiplicator"
+        :rollUnder="rollUnder"
+        :winChance="winChance"
+        :overMode="overMode"
+        @click="handleOddItemClick"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useMyFetch } from "~/composable/useMyFetch";
-import { useAuthStore } from "~/stores/auth";
+import { useApiFetch } from "../composable/useApiFetch";
+import { useAuthStore } from "../stores/auth";
 
 const amount = ref("");
 const amountError = ref(false);
@@ -93,22 +116,21 @@ async function handleRequestBet() {
   if (amountError.value) return;
   if (Number.parseFloat(amount.value) > authStore.deposit) return;
   if (connectionCounter.value > 0) return;
+
   authStore.subtractDeposit(Number.parseFloat(amount.value ?? "0.00"));
   connectionCounter.value += 1;
-  const data = await useMyFetch("/play/dice", {
+  const data = await useApiFetch("/play/dice", {
     method: "POST",
     body: JSON.stringify({
       rollMode: overMode.value ? "Roll Over" : "Roll Under",
       rollValue: sliderPrecentage.value,
       amount: Number.parseFloat(amount.value !== "" ? amount.value : "0.00"),
     }),
-  })
-    .catch((err) => {
-      console.error(err);
-    })
-    .finally(() => {
-      connectionCounter.value -= 1;
-    });
+  }).catch((err) => {
+    console.error(err);
+  }).finally(() => {
+    connectionCounter.value -= 1;
+  });
   if (!data) return;
   authStore.setDeposit(data.newBalance);
   lastBet.value = {

@@ -41,4 +41,5 @@ export default {
         },
     },
     plugins: [],
+    safelist: ['border-gray-900'],
 };

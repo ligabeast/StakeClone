@@ -9,6 +9,7 @@ import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 
 import type { Request, Response } from 'express';
+import fs from 'fs';
 import type { CorsOptions } from 'cors';
 import resolvers from './resolvers';
 
@@ -47,9 +48,10 @@ export interface TypedResponse<ResBody> extends Express.Response {
 app.use(bodyParser.json());
 
 const generateToken = (payload): string => {
-    const secretKey = process.env.JWT_SECRET_KEY;
+    const secretKey = process.env.JWT_PRIVATE_KEY;
     const options = {
-        expiresIn: '1h',
+        expiresIn: '24h',
+        algorithm: 'RS256',
     };
 
     const token = jwt.sign(payload, secretKey, options);
@@ -186,7 +188,9 @@ const verifyToken = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const decoded = jwt.verify(token, process.env.JWT_PUBLIC_KEY, {
+            algorithm: 'RS256',
+        });
         req.cookie = decoded;
         next();
     } catch (error) {
@@ -210,6 +214,13 @@ app.post(
         }>
     ) => {
         const { username, password } = req.body;
+
+        if (!username || !password) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please provide username and password',
+            });
+        }
 
         try {
             // Query to get the hashed password from the database
@@ -308,6 +319,7 @@ app.post(
         const user = await User.create({
             username,
             password: hashedPassword,
+            deposit: '50.00',
         });
 
         const token = generateToken({
@@ -322,7 +334,7 @@ app.post(
                 message: 'User registered successfully',
                 token: token,
                 username: username,
-                deposit: 0,
+                deposit: 50.0,
             });
         } else {
             res.status(500).json({

@@ -38,12 +38,12 @@ const resolvers = {
             return Bet.findAll(queryOptions);
         },
         getDepositOfUser: async (parent, args, context) => {
-            const { userid } = args;
+            const { username } = args;
             const User = context.db.define('User', userResolver);
             const user = await User.findOne({
                 attributes: ['deposit'],
                 where: {
-                    id: userid,
+                    username: username,
                 },
             });
             return user.deposit;

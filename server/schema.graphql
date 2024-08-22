@@ -1,47 +1,47 @@
 type Game {
-  id: ID!
-  name: String!
-  img: String!
-  createdAt: String
-  updatedAt: String
+    id: ID!
+    name: String!
+    img: String!
+    createdAt: String
+    updatedAt: String
 }
 
 type Bet {
-  id: ID!
-  userid: ID!
-  gameid: ID!
-  amount: Float!
-  payout: Float
-  transaction_id: ID!
-  currency: String!
-  bet_status: String!
-  odds: Float
-  createdAt: String
-  updatedAt: String
+    id: ID!
+    userid: ID!
+    gameid: ID!
+    amount: Float!
+    payout: Float
+    transaction_id: ID!
+    currency: String!
+    bet_status: String!
+    odds: Float
+    createdAt: String
+    updatedAt: String
 }
 
 type Deposit {
-  deposit: Float!
+    deposit: Float!
 }
 
 type Users {
-  id: ID!
-  username: String!
-  email: String!
-  password: String!
-  createdAt: String
-  updatedAt: String
+    id: ID!
+    username: String!
+    email: String!
+    password: String!
+    createdAt: String
+    updatedAt: String
 }
 
 type Query {
-  game(id: ID!): Game
-  games: [Game!]!
-  bet(id: ID!): Bet
-  bets(
-    status: [String]
-    limit: Int
-    order_by: String
-    order_dir: String
-  ): [Bet!]!
-  getDepositOfUser(userid: ID!): Float
+    game(id: ID!): Game
+    games: [Game!]!
+    bet(id: ID!): Bet
+    bets(
+        status: [String]
+        limit: Int
+        order_by: String
+        order_dir: String
+    ): [Bet!]!
+    getDepositOfUser(username: String!): Float
 }
