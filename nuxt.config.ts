@@ -38,7 +38,7 @@ export default defineNuxtConfig({
         // tokenStorage: "cookie",
         // proxyCookies: true,
         clients: {
-            default: { httpEndpoint: 'http://localhost:3003/graphql' },
+            default: { httpEndpoint: process.env.BASE_URL + '/graphql' },
             // tokenName: "apollo:<client-name>.token",
             // tokenStorage: "cookie",
             // authType: "Bearer",
