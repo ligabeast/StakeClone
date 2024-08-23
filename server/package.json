@@ -24,11 +24,9 @@
         "mariadb": "^3.3.1",
         "sequelize": "^6.37.3",
         "ts-node": "^10.9.2",
-        "typescript": "^5.5.4"
-    },
-    "devDependencies": {
-        "@types/cors": "^2.8.17",
+        "typescript": "^5.5.4",
         "@types/express": "^4.17.21",
+        "@types/cors": "^2.8.17",
         "sequelize-cli": "^6.6.2"
     },
     "peerDependencies": {
