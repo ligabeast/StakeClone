@@ -61,7 +61,7 @@ const generateToken = (payload): string => {
 // Load environment variables from the .env file in the root directory
 dotenv.config({ path: '../.env' });
 
-const port = process.env.EXPRESS_PORT;
+const port = process.env.PORT || 3000;
 const allowedOrigins = process.env.CORS_ORIGIN.split(',');
 const corsOptions: CorsOptions = {
     origin: function (origin, callback) {
