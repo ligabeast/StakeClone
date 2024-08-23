@@ -17,7 +17,7 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 
 import Express from 'express';
-import { Query, Send } from 'express-serve-static-core';
+import type { Query, Send } from 'express-serve-static-core';
 
 import bcrypt from 'bcrypt';
 import {
