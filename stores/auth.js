@@ -14,7 +14,6 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const decodedToken = jwtDecode(newToken);
             username.value = decodedToken.username;
-            deposit.value = decodedToken.deposit;
         } catch (error) {
             console.error('Failed to decode token:', error);
             return null;
@@ -26,7 +25,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     function setDeposit(newDeposit) {
-        deposit.value = newDeposit;
+        if (typeof newDeposit == 'number') {
+            deposit.value = newDeposit;
+        } else if (typeof newDeposit == 'string') {
+            deposit.value = parseFloat(newDeposit);
+        }
     }
 
     function subtractDeposit(amount) {

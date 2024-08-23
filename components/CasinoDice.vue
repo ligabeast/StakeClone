@@ -148,9 +148,9 @@ function handleDoubleAmount() {
   const convert = Number.parseFloat(amount.value);
 
   if (convert * 2 > authStore.deposit) {
-    amount.value = authStore.deposit.toFixed(2).toString();
+    amount.value = authStore.deposit.toFixed(2);
   } else {
-    amount.value = (convert * 2).toFixed(2).toString();
+    amount.value = (convert * 2).toFixed(2);
   }
 }
 

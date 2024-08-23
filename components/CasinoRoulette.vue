@@ -97,7 +97,7 @@ const placedNumberBets = ref(Array.from({ length: 37 }, () => 0));
 const placedAdditionalBets = ref(Array.from({ length: 9 }, () => 0));
 
 const authStore = useAuthStore();
-const deposit = ref(authStore.deposit);
+const deposit = computed(() => authStore.deposit);
 
 const betPlaced = ref(false);
 const showWinningNumber = ref(false);
@@ -119,9 +119,6 @@ const openMoney = computed(() => {
   return deposit.value - totalBet.value;
 });
 
-watch(() => authStore.deposit, (newDeposit) => {
-  deposit.value = newDeposit;
-});
 
 
 async function handleRequestBet() {

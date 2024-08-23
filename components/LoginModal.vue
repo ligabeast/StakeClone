@@ -176,7 +176,6 @@ function handleLoginRequest() {
         }),
     }).then((data) => {
         authStore.setDeposit(data.deposit);
-        authStore.setUsername(data.username);
         authStore.setToken(data.token);
 
         const token = useCookie("token");

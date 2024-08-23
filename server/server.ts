@@ -9,7 +9,6 @@ import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 
 import type { Request, Response } from 'express';
-import fs from 'fs';
 import type { CorsOptions } from 'cors';
 import resolvers from './resolvers';
 
@@ -61,7 +60,7 @@ const generateToken = (payload): string => {
 // Load environment variables from the .env file in the root directory
 dotenv.config({ path: '../.env' });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3003;
 const allowedOrigins = process.env.CORS_ORIGIN.split(',');
 const corsOptions: CorsOptions = {
     origin: function (origin, callback) {
@@ -143,7 +142,6 @@ import { schema as TransactionSchema } from './schemas/transaction.js';
 import { schema as GameSchema } from './schemas/game.js';
 import { schema as RouletteGamesSchema } from './schemas/rouletteGames.js';
 import { schema as RouletteBetsSchema } from './schemas/rouletteBet.js';
-import { timeStamp } from 'console';
 
 const User = sequelize.define('Users', UserSchema);
 const DiceBet = sequelize.define('DiceBets', DiceBetSchema, {

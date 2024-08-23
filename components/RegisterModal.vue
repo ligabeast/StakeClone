@@ -205,7 +205,6 @@ function handleRegisterRequest() {
         }),
     }).then((data: any) => {
         authStore.setDeposit(data.deposit);
-        authStore.setUsername(data.username);
         authStore.setToken(data.token);
 
         const token = useCookie("token");

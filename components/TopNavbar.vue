@@ -127,7 +127,6 @@
 </template>
 
 <script setup lang="ts">
-import { useMyFetch } from "~/composable/useMyFetch";
 import { useAuthStore } from "~/stores/auth";
 
 const authStore = useAuthStore();
