@@ -25,6 +25,7 @@ import {
     LCG,
     calculateWinningAmount,
     calculateOdd,
+    properlyRound,
 } from './utils';
 
 interface JWTToken {
@@ -426,7 +427,7 @@ app.post(
 
         console.log('user found:', user);
 
-        if (potentialWin + user.deposit === user.deposit) {
+        if (potentialWin === 0) {
             return res.json({
                 success: userHasWon,
                 message: userHasWon ? 'You won!' : 'You lost!',
@@ -456,7 +457,7 @@ app.post(
                 user,
             });
 
-            user.deposit -= amountFixed;
+            user.deposit = properlyRound(user.deposit - amountFixed, 2);
 
             if (userHasWon) {
                 const message = `Won ${amountFixed}$ on a ${rollMode} of ${rollValue}`;
@@ -484,7 +485,7 @@ app.post(
                     success: true,
                     message: 'You won!',
                     randomNumber,
-                    newBalance: potentialWin + user.deposit,
+                    newBalance: properlyRound(potentialWin + user.deposit, 2),
                 });
             } else {
                 await transaction.commit();
@@ -562,7 +563,7 @@ app.post(
         try {
             // Update User Deposit
             await User.update(
-                { deposit: user.deposit - betAmount },
+                { deposit: properlyRound(user.deposit - betAmount, 2) },
                 {
                     where: {
                         id: user.id,
@@ -607,7 +608,7 @@ app.post(
                 JSON.stringify({
                     success: true,
                     message: 'The bet is accepted',
-                    newBalance: user.deposit - betAmount,
+                    newBalance: properlyRound(user.deposit - betAmount, 2),
                 })
             );
         } catch (error) {

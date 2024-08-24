@@ -192,34 +192,32 @@ const samePassword = computed(() => {
     return password.value === confirmPassword.value;
 });
 
-function handleRegisterRequest() {
+async function handleRegisterRequest() {
     if (!samePassword.value) {
         console.log('Password not match');
         return;
     }
-    useApiFetch("/register", {
+    const data = await useApiFetch("/register", {
         method: "POST",
         body: JSON.stringify({
             username: username.value,
             password: password.value,
         }),
-    }).then((data: any) => {
-        authStore.setDeposit(data.deposit);
-        authStore.setToken(data.token);
-
-        const token = useCookie("token");
-        token.value = data.token;
-
-        emit('success');
-        emit('closeModal');
-        console.log("register success: ", data);
     }).catch((error: any) => {
         if (error.response?.status === 401) {
             console.log('Username already exists');
             emit('usernameExists');
         }
     });
+    authStore.setDeposit(data.deposit);
+    authStore.setToken(data.token);
 
+    const token = useCookie("token");
+    token.value = data.token;
+
+    emit('success');
+    emit('closeModal');
+    console.log("register success: ", data);
 }
 
 </script>

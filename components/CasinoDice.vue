@@ -122,6 +122,7 @@ async function handleRequestBet() {
   if (connectionCounter.value > 0) return;
 
   authStore.subtractDeposit(Number.parseFloat(amount.value ?? "0.00"));
+
   connectionCounter.value += 1;
   const data = await useApiFetch("/play/dice", {
     method: "POST",
@@ -135,7 +136,9 @@ async function handleRequestBet() {
   }).finally(() => {
     connectionCounter.value -= 1;
   });
+
   if (!data) return;
+
   authStore.setDeposit(data.newBalance);
   lastBet.value = {
     value: data.randomNumber,

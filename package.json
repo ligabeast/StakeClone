@@ -10,15 +10,15 @@
         "postinstall": "nuxt prepare"
     },
     "dependencies": {
+        "@nuxtjs/apollo": "^5.0.0-alpha.14",
         "@nuxtjs/google-fonts": "^3.2.0",
         "jwt-decode": "^3.1.2",
         "notivue": "^2.4.4",
         "nuxt": "^3.12.2",
         "pinia": "^2.2.1",
+        "tailwindcss": "^3.4.7",
         "vue": "^3.4.29",
-        "vue-router": "^4.3.3",
-        "@nuxtjs/apollo": "^5.0.0-alpha.14",
-        "tailwindcss": "^3.4.7"
+        "vue-router": "^4.3.3"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",

@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Define actions
     function setToken(newToken) {
         token.value = newToken;
+        if (!newToken) return;
         try {
             const decodedToken = jwtDecode(newToken);
             username.value = decodedToken.username;
@@ -33,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     function subtractDeposit(amount) {
-        deposit.value -= amount;
+        deposit.value = Math.round((deposit.value - amount) * 100) / 100;
     }
 
     function reset() {

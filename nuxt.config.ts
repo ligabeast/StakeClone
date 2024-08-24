@@ -9,7 +9,7 @@ export default defineNuxtConfig({
         'notivue/notification-progress.css',
         'notivue/animations.css',
     ],
-    plugins: ['~/plugins/pinia.js'],
+    plugins: ['~/plugins/pinia.js', '~/plugins/apollo-overwrite.js'],
     runtimeConfig: {
         public: {
             baseUrl: process.env.BASE_URL,
@@ -35,10 +35,13 @@ export default defineNuxtConfig({
         autoImports: true,
         // authType: "Bearer",
         // authHeader: "Authorization",
-        // tokenStorage: "cookie",
+        tokenStorage: 'cookie',
         // proxyCookies: true,
         clients: {
-            default: { httpEndpoint: process.env.BASE_URL + '/graphql' },
+            default: {
+                httpEndpoint: process.env.BASE_URL + '/graphql',
+                inMemoryCacheOptions: {},
+            },
             // tokenName: "apollo:<client-name>.token",
             // tokenStorage: "cookie",
             // authType: "Bearer",

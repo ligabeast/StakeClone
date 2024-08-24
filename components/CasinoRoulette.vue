@@ -192,7 +192,7 @@ ws.onmessage = (event) => {
     last5Numbers.value = data.last5Numbers;
     if (betPlaced.value) {
       betPlaced.value = false;
-      authStore.setDeposit(Number.parseFloat(data.newBalance));
+      authStore.setDeposit(data.newBalance);
     }
   }
 };
