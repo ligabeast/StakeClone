@@ -1,0 +1,37 @@
+# Exported from Render on 2024-08-24T14:33:20Z
+services:
+    - type: web
+      name: StakeClone-Backend
+      runtime: node
+      repo: https://github.com/ligabeast/StakeClone
+      branch: releases
+      plan: free
+      envVars:
+          - fromGroup: Stake
+      region: frankfurt
+      buildCommand: npm i
+      startCommand: npm run dev
+      rootDir: server
+    - type: web
+      name: StakeClone-RouletteMS
+      runtime: go
+      repo: https://github.com/ligabeast/StakeClone
+      branch: releases
+      plan: free
+      envVars:
+          - fromGroup: Stake
+      region: frankfurt
+      buildCommand: go build ./microservices/roulette/main.go
+      startCommand: ./main
+    - type: web
+      name: StakeClone-Frontend
+      runtime: node
+      repo: https://github.com/ligabeast/StakeClone
+      branch: releases
+      plan: free
+      envVars:
+          - fromGroup: Stake
+      region: frankfurt
+      buildCommand: npm install && npm run build
+      startCommand: node .output/server/index.mjs
+version: '1'

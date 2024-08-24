@@ -1,0 +1,12 @@
+{
+  "development": {
+    "host": "database-1.c1ykw2ukk99l.eu-north-1.rds.amazonaws.com",
+    "username": "admin",
+    "password": "awqHLfklqVVeiFlIKJcD",
+    "database": "Stake",
+    "dialect": "mariadb",
+    "dialectOptions": {
+      "connectTimeout": 3000
+    }
+  }
+}
