@@ -199,6 +199,7 @@ ws.onmessage = (event) => {
 
 ws.onerror = (error) => {
   console.error("WebSocket error:", error);
+  push.error("The WebSocket seems to be down, contact support");
 };
 
 ws.onclose = () => {
