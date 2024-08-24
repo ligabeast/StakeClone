@@ -122,6 +122,10 @@ const openMoney = computed(() => {
 
 
 async function handleRequestBet() {
+  if (!authStore.isAuthenticated) {
+    push.error("You need to be logged in to place a bet");
+    return;
+  }
   betPlaced.value = true;
   const data = await useMyFetch("/play/roulette", {
     method: "POST",

@@ -111,6 +111,10 @@ function handleAmountChange(newAmount: string) {
 }
 
 async function handleRequestBet() {
+  if (!authStore.isAuthenticated) {
+    push.error("You need to be logged in to place a bet");
+    return;
+  }
   if (showBet.value) return;
   showBet.value = false;
   if (amountError.value) return;
