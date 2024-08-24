@@ -1,1 +1,2 @@
-https://stakeclone-1.onrender.com/
+https://stakeclone-1.onrender.com/ (takes upto 60seconds for each component to restart on inactivity)
+ 
