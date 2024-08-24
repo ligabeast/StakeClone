@@ -64,6 +64,16 @@ func StoreInitialRouletteGame() int {
 }
 
 func StoreDrawnRouletteGame(winningNumber int, id int) map[int]float64 {
+
+	rows, err := stakeDb.Query("SELECT b.userId as userid, u.deposit as deposit, rbs.numberBets as numberBets, rbs.additionalBets as additionalBets from Stake.RouletteGames roga JOIN Stake.RouletteBets rbs ON rbs.rouletteGameId = roga.id JOIN Stake.Bets b On b.referenceId = rbs.id JOIN Stake.Users u ON u.id = b.userId where roga.id = ?", id)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	newBalance := make(map[int]float64)
+
 	// return map of user id and newBalance
 	if stakeDb == nil {
 		log.Fatal("Stake DB not initialized")
@@ -97,24 +107,12 @@ func StoreDrawnRouletteGame(winningNumber int, id int) map[int]float64 {
 		winningSection = "25-36"
 	}
 
-	_, err := stakeDb.Exec("Update Stake.RouletteGames SET winningNumber=?,winningColor=?,winningSection=?,isOdd=?,status='completed' where id = ?", winningNumber, winningColor, winningSection, isOdd, id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("Stored drawn roulette game", id)
-
-	rows, err := stakeDb.Query("SELECT b.userId as userid, u.deposit as deposit, rbs.numberBets as numberBets, rbs.additionalBets as additionalBets from Stake.RouletteGames roga JOIN Stake.RouletteBets rbs ON rbs.rouletteGameId = roga.id JOIN Stake.Bets b On b.referenceId = rbs.id JOIN Stake.Users u ON u.id = b.userId where roga.id = ?", id)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	newBalance := make(map[int]float64)
-
 	fmt.Println("Calculating profit for users")
 
+	hasRows := false
+
 	for rows.Next() {
+		hasRows = true
 		var userId int
 		var deposit float64
 		var numberBets string
@@ -154,6 +152,21 @@ func StoreDrawnRouletteGame(winningNumber int, id int) map[int]float64 {
 
 		newBalance[userId] = deposit + profit
 	}
+
+	if !hasRows {
+		_, err := stakeDb.Exec("DELETE FROM Stake.RouletteGames where id = ?", id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Deleting roulette game due to inactivity", id)
+	}else{
+		_, err := stakeDb.Exec("Update Stake.RouletteGames SET winningNumber=?,winningColor=?,winningSection=?,isOdd=?,status='completed' where id = ?", winningNumber, winningColor, winningSection, isOdd, id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Stored drawn roulette game", id)
+	}
+
 	return newBalance
 }
 

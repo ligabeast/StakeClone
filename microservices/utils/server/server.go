@@ -11,6 +11,9 @@ import (
 )
 
 func ExtractUserIdFromJWT(jwttoken string) int {
+	if jwttoken == "" {
+		return -1
+	}
 	JWT_PUBLIC_KEY:=os.Getenv("JWT_PUBLIC_KEY")
 
 	block, _ := pem.Decode([]byte(JWT_PUBLIC_KEY))
