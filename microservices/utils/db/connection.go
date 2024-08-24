@@ -7,7 +7,6 @@ import (
 	"os"
 	"encoding/json"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -34,10 +33,6 @@ func InitStakeDBConnection() {
 }
 
 func getStakeDBdsn() string {
-	err := godotenv.Load()
-	if err != nil {
-	  log.Fatal("Error loading .env file")
-	}
 	DB_NAME:=os.Getenv("DB_NAME")
 	DB_USER:=os.Getenv("DB_USER")
 	DB_PASSWORD:=os.Getenv("DB_PASSWORD")
