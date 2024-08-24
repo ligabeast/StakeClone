@@ -84,7 +84,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from "../stores/auth";
-import { useMyFetch } from "~/composable/useMyFetch";
+import { useApiFetch } from "~/composable/useApiFetch";
 
 const countDown = ref(0);
 const winningNumber = ref(0);
@@ -127,7 +127,7 @@ async function handleRequestBet() {
     return;
   }
   betPlaced.value = true;
-  const data = await useMyFetch("/play/roulette", {
+  const data = await useApiFetch("/play/roulette", {
     method: "POST",
     body: JSON.stringify({
       placedNumberBets: placedNumberBets.value,

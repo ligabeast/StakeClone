@@ -167,28 +167,28 @@ const authStore = useAuthStore();
 const username = ref("");
 const password = ref("");
 
-function handleLoginRequest() {
-    useApiFetch("/login", {
+async function handleLoginRequest() {
+    const data = await useApiFetch("/login", {
         method: "POST",
         body: JSON.stringify({
             username: username.value,
             password: password.value,
         }),
-    }).then((data) => {
-        authStore.setDeposit(data.deposit);
-        authStore.setToken(data.token);
-
-        const token = useCookie("token");
-        token.value = data.token;
-
-        emit('success')
-        emit("closeModal");
-        console.log("login success: ", data);
     }).catch((error) => {
         if (error.response?.status === 401) {
             emit('userNotFound')
         }
     });
+    authStore.setDeposit(data.deposit);
+    authStore.setToken(data.token);
+
+    const token = useCookie("token");
+    token.value = data.token;
+
+    emit('success')
+    emit("closeModal");
+    console.log("login success: ", data);
+
 }
 
 </script>
