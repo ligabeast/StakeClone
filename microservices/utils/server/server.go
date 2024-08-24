@@ -5,18 +5,12 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"log"
 	"os"
 )
 
 func ExtractUserIdFromJWT(jwttoken string) int {
-	err := godotenv.Load()
-	if err != nil {
-	  log.Fatal("Error loading .env file")
-	  return -1
-	}
 	JWT_PUBLIC_KEY:=os.Getenv("JWT_PUBLIC_KEY")
 
 	block, _ := pem.Decode([]byte(JWT_PUBLIC_KEY))
