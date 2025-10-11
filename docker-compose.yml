@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+    webserver:
+        build: ./frontend
+        container_name: nuxt_web
+        ports:
+            - '3000:3000'
+        depends_on:
+            - db
+        restart: always
+
+    db:
+        image: mariadb:11
+        container_name: casino_db
+        environment:
+            MYSQL_ROOT_PASSWORD: rootpassword
+            MYSQL_DATABASE: Stake
+            MYSQL_USER: admin
+            MYSQL_PASSWORD: awqHLfklqVVeiFlIKJcD
+        volumes:
+            - db_data:/var/lib/mysql
+        ports:
+            - '3306:3306'
+        restart: always
+
+    roulette:
+        build: ./microservices/roulette
+        container_name: roulette_service
+        depends_on:
+            - db
+        environment:
+            DB_USER: admin
+            DB_PASSWORD: awqHLfklqVVeiFlIKJcD
+            DB_HOST: db
+            DB_PORT: 3306
+            DB_DIALECT: mariadb
+            DB_NAME: Stake
+        restart: always
+
+volumes:
+    db_data:
