@@ -2,7 +2,9 @@ version: '3.9'
 
 services:
     webserver:
-        build: ./frontend
+        build:
+            context: .
+            dockerfile: frontend.dockerfile
         container_name: nuxt_web
         ports:
             - '3000:3000'
@@ -25,7 +27,9 @@ services:
         restart: always
 
     roulette:
-        build: ./microservices/roulette
+        build:
+            context: .
+            dockerfile: microservice.dockerfile
         container_name: roulette_service
         depends_on:
             - db
