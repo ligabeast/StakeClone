@@ -1,18 +1,21 @@
-# ---- Build Stage ----
-FROM node:20-alpine as build
+FROM node:20-alpine
 
+# Arbeitsverzeichnis im Container
 WORKDIR /app
+
+# Package-Dateien kopieren und Dependencies installieren
 COPY package*.json ./
 RUN npm install
 
+# Rest des Projekts kopieren
 COPY . .
-RUN npm run build
 
-# ---- Run Stage ----
-FROM node:20-alpine
+# .env einbinden
+COPY .env .env
 
-WORKDIR /app
-COPY --from=build /app/.output ./
+# Port für Nuxt Dev-Server
+ENV PORT=3001
+EXPOSE 3001
 
-EXPOSE 3000
-CMD ["node", "server/index.mjs"]
+# Nuxt Development Server starten
+CMD ["npm", "run", "dev"]

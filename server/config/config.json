@@ -1,6 +1,6 @@
 {
   "development": {
-    "host": "database-1.c1ykw2ukk99l.eu-north-1.rds.amazonaws.com",
+    "host": "152.89.239.83",
     "username": "admin",
     "password": "awqHLfklqVVeiFlIKJcD",
     "database": "Stake",
