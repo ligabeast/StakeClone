@@ -223,7 +223,7 @@ app.post(
         }
 
         try {
-            if (username === 'demo' && password === 'demo') {
+            if (username == 'demo' && password == 'demo') {
                 const demoCount = await User.count({
                     where: {
                         username: { [Op.like]: 'demo-%' },
