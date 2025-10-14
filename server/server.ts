@@ -11,6 +11,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import type { Request, Response } from 'express';
 import type { CorsOptions } from 'cors';
 import resolvers from './resolvers';
+import { Op } from 'sequelize';
 
 const { Sequelize } = require('sequelize');
 const jwt = require('jsonwebtoken');
