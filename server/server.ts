@@ -11,7 +11,6 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import type { Request, Response } from 'express';
 import type { CorsOptions } from 'cors';
 import resolvers from './resolvers';
-import { Op } from 'sequelize';
 
 const { Sequelize } = require('sequelize');
 const jwt = require('jsonwebtoken');
@@ -224,13 +223,9 @@ app.post(
 
         try {
             if (username == 'demo' && password == 'demo') {
-                const demoCount = await User.count({
-                    where: {
-                        username: { [Op.like]: 'demo-%' },
-                    },
-                });
+                const randomNumber = Math.floor(Math.random() * 1000000);
 
-                const newUsername = `demo-${demoCount + 1}`;
+                const newUsername = `demo-${randomNumber}`;
                 const hashedPassword = await bcrypt.hash('demo', 10);
 
                 // Demo-User anlegen
