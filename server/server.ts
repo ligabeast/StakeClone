@@ -222,23 +222,56 @@ app.post(
         }
 
         try {
-            // Query to get the hashed password from the database
+            // 🧠 Sonderfall: Demo-Account-Login
+            if (username === 'demo' && password === 'demo') {
+                // Zähle vorhandene Demo-User
+                const demoCount = await User.count({
+                    where: {
+                        username: { [Op.like]: 'demo-%' },
+                    },
+                });
+
+                const newUsername = `demo-${demoCount + 1}`;
+                const hashedPassword = await bcrypt.hash('demo', 10);
+
+                // Demo-User anlegen
+                const newUser = await User.create({
+                    username: newUsername,
+                    password: hashedPassword,
+                    deposit: 1000, // z. B. Startguthaben
+                });
+
+                const token = generateToken({
+                    username: newUser.username,
+                    userid: newUser.id,
+                });
+
+                res.cookie('token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    maxAge: 3600000,
+                });
+
+                return res.json({
+                    success: true,
+                    message: 'Demo user created successfully',
+                    token: token,
+                    username: newUser.username,
+                    deposit: newUser.deposit,
+                });
+            }
+
+            // 🔐 Normale Login-Logik
             const userFound = await User.findOne({
-                where: {
-                    username,
-                },
+                where: { username },
                 attributes: ['password', 'deposit', 'id'],
             });
+
             if (userFound?.password) {
-                const storedHashedPassword = userFound.password;
-                const deposit = userFound.deposit;
-                const userid = userFound.id;
-                // Compare the provided password with the stored hashed password
                 const isPasswordMatch = await bcrypt.compare(
                     password,
-                    storedHashedPassword
+                    userFound.password
                 );
-
                 if (!isPasswordMatch) {
                     return res.status(401).json({
                         success: false,
@@ -246,26 +279,23 @@ app.post(
                     });
                 }
 
-                // Generate JWT token
                 const token = generateToken({
                     username,
-                    password: storedHashedPassword,
-                    userid,
+                    userid: userFound.id,
                 });
 
-                // Set the token in a cookie
                 res.cookie('token', token, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
-                    maxAge: 3600000, // 1 hour
+                    maxAge: 3600000,
                 });
 
                 return res.json({
                     success: true,
                     message: 'Login successfully',
-                    token: token,
-                    username: username,
-                    deposit: deposit,
+                    token,
+                    username,
+                    deposit: userFound.deposit,
                 });
             } else {
                 return res.status(402).json({
