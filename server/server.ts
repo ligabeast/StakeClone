@@ -222,9 +222,7 @@ app.post(
         }
 
         try {
-            // 🧠 Sonderfall: Demo-Account-Login
             if (username === 'demo' && password === 'demo') {
-                // Zähle vorhandene Demo-User
                 const demoCount = await User.count({
                     where: {
                         username: { [Op.like]: 'demo-%' },
@@ -261,7 +259,6 @@ app.post(
                 });
             }
 
-            // 🔐 Normale Login-Logik
             const userFound = await User.findOne({
                 where: { username },
                 attributes: ['password', 'deposit', 'id'],
